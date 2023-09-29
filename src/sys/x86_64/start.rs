@@ -10,16 +10,12 @@ core::arch::global_asm!(
     // Pass the variables to the start function arguments.
     "mov rdi, [rsp]",       // &argc = rsp
     "mov rsi, [rsp+8]",     // &argv = rsp+8
-
-    "mov rdx, rdi",         // &envp = rsp+8*argc+8
-    "mov rax, 8",
-    "mul rdx",
-    "add rdx, 8",
-    "add rdx, rsp",
-    "mov rdx, [rdx]",       // &envp = rsp+8*argc+8
+    "mov rdx, rsp",
 
     // The stack will be 16-byte aligned at process entry already.
     // So we're good to go!
     "call {start}",
+    // Our start never returns, but just to be sure...
+    "ud2",
     start = sym crate::start::start
 );

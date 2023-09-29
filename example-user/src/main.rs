@@ -1,3 +1,4 @@
+#![feature(panic_info_message)]
 #![cfg_attr(not(test), no_std)]
 #![no_main]
 
@@ -9,8 +10,13 @@ extern crate libuwuc;
 
 #[panic_handler]
 #[cfg(not(test))]
-fn handler(_arg: &core::panic::PanicInfo) -> ! {
-    libuwuc::io::println!("panic!");
+fn handler(arg: &core::panic::PanicInfo) -> ! {
+    let args = format_args!("<no message>");
+    let payload = arg.message().unwrap_or(&args);
+    libuwuc::io::println!("panicked: {payload}");
+    if let Some(loc) = arg.location() {
+        libuwuc::io::println!("  at {}:{}:{}", loc.file(), loc.line(), loc.column());
+    }
     libuwuc::start::exit(1);
 }
 

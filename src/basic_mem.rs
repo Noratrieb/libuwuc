@@ -6,3 +6,13 @@ pub(crate) unsafe extern "C" fn memset(ptr: *mut u8, constant: u8, len: usize) {
         }
     }
 }
+
+#[no_mangle]
+pub(crate) unsafe extern "C" fn strlen(mut s: *const u8) -> usize {
+    let mut len = 0;
+    while s.read() != 0 {
+        len += 1;
+        s = s.add(1);
+    }
+    len
+}
