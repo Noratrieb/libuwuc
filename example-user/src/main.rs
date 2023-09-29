@@ -3,15 +3,19 @@
 
 use core::ffi::c_char;
 
+use libuwuc::println;
+
 extern crate libuwuc;
 
 #[panic_handler]
 #[cfg(not(test))]
 fn handler(_arg: &core::panic::PanicInfo) -> ! {
-    loop {}
+    libuwuc::io::println!("panic!");
+    libuwuc::start::exit(1);
 }
 
 #[no_mangle]
 extern "C" fn main(_argc: i32, _argv: *const *const c_char) -> i32 {
+    println!("Hello, world!");
     0
 }
