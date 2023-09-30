@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+args=("-nodefaultlibs" "-nostdlib" "-L${SCRIPT_DIR}/target/debug" "-lrawc")
+
+exec gcc "$@" "${args[@]}"

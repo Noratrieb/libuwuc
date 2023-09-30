@@ -3,13 +3,6 @@
 version = 3
 
 [[package]]
-name = "c"
-version = "0.1.0"
-dependencies = [
- "libuwuc",
-]
-
-[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -20,4 +13,11 @@ name = "libuwuc"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "rawc"
+version = "0.1.0"
+dependencies = [
+ "libuwuc",
 ]

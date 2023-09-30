@@ -1,5 +1,5 @@
 [workspace]
-members = ["libuwuc", "c"]
+members = ["libuwuc", "rawc"]
 resolver = "2"
 
 [profile.dev]

@@ -14,5 +14,5 @@ panic = "abort"
 panic = "abort"
 
 [dependencies]
-c = { path = "../c" }
+rawc = { path = "../rawc" }
 libuwuc = { path = "../libuwuc" }
