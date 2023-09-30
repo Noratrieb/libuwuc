@@ -1,6 +1,7 @@
 #![no_std]
 #![feature(c_variadic)]
 #![warn(unreachable_pub)]
+#![warn(rust_2018_idioms)]
 #![allow(clippy::missing_safety_doc)]
 
 #[cfg(test)]

@@ -1,9 +1,4 @@
-use core::{
-    cell::UnsafeCell,
-    ffi::{c_char, CStr},
-    fmt::Debug,
-    ptr::NonNull,
-};
+use core::{cell::UnsafeCell, ffi::CStr, fmt::Debug, marker::PhantomData, ptr::NonNull};
 
 #[repr(transparent)]
 #[derive(Default)]
@@ -13,44 +8,55 @@ unsafe impl<T: Sync> Sync for SyncUnsafeCell<T> {}
 
 #[derive(Clone, Copy)]
 #[repr(transparent)]
-pub struct SharedThinCstr(pub NonNull<c_char>);
+pub struct SharedThinCstr<'a>(NonNull<u8>, PhantomData<&'a CStr>);
 
-impl SharedThinCstr {
-    pub unsafe fn from_ptr(ptr: NonNull<c_char>) -> Self {
-        Self(ptr)
+#[macro_export]
+macro_rules! cstr {
+    ($value:literal) => {{
+        let s = concat!($value, "\0");
+        #[allow(unused_unsafe)]
+        unsafe { $crate::utils::SharedThinCstr::from_raw(s.as_ptr().cast()) }
+    }};
+}
+
+pub use cstr;
+
+impl<'a> SharedThinCstr<'a> {
+    pub unsafe fn from_raw(ptr: *const u8) -> Self {
+        Self(NonNull::new_unchecked(ptr as *mut u8), PhantomData)
     }
 
-    pub unsafe fn from_raw(ptr: *const c_char) -> Self {
-        Self(NonNull::new_unchecked(ptr as _))
-    }
-
-    pub fn from_array<const N: usize>(arr: &[u8; N]) -> Self {
-        assert!(arr[N - 1] == 0);
-        unsafe { Self(NonNull::new_unchecked(arr as *const u8 as *mut c_char)) }
-    }
-
-    pub fn as_ptr(self) -> NonNull<c_char> {
+    pub fn as_ptr(self) -> NonNull<u8> {
         self.0
     }
 
+    pub fn as_raw(self) -> *const u8 {
+        self.0.as_ptr()
+    }
+
     pub unsafe fn add(self, amount: usize) -> Self {
-        Self(NonNull::new_unchecked(self.0.as_ptr().add(amount)))
+        Self::from_raw(self.0.as_ptr().add(amount))
+    }
+
+    pub fn first(self) -> Option<u8> {
+        let c = unsafe { self.0.as_ptr().read() };
+        (c != 0).then_some(c as _)
     }
 }
 
-impl IntoIterator for SharedThinCstr {
+impl<'a> IntoIterator for SharedThinCstr<'a> {
     type Item = u8;
 
-    type IntoIter = CStrIter;
+    type IntoIter = CStrIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         CStrIter(self)
     }
 }
 
-pub struct CStrIter(SharedThinCstr);
+pub struct CStrIter<'a>(SharedThinCstr<'a>);
 
-impl Iterator for CStrIter {
+impl<'a> Iterator for CStrIter<'a> {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -66,10 +72,10 @@ impl Iterator for CStrIter {
     }
 }
 
-unsafe impl Send for SharedThinCstr {}
-unsafe impl Sync for SharedThinCstr {}
+unsafe impl<'a> Send for SharedThinCstr<'a> {}
+unsafe impl<'a> Sync for SharedThinCstr<'a> {}
 
-impl Debug for SharedThinCstr {
+impl<'a> Debug for SharedThinCstr<'a> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let str = <&CStr>::from(*self).to_str();
         match str {
@@ -79,25 +85,19 @@ impl Debug for SharedThinCstr {
     }
 }
 
-impl From<SharedThinCstr> for &CStr {
-    fn from(value: SharedThinCstr) -> Self {
-        unsafe { CStr::from_ptr(value.0.as_ptr()) }
+impl<'a> From<SharedThinCstr<'a>> for &'a CStr {
+    fn from(value: SharedThinCstr<'a>) -> Self {
+        unsafe { CStr::from_ptr(value.0.as_ptr().cast()) }
     }
 }
 
-impl PartialEq for SharedThinCstr {
+impl<'a> PartialEq for SharedThinCstr<'a> {
     fn eq(&self, other: &Self) -> bool {
         self.into_iter().eq(*other)
     }
 }
 
-impl Eq for SharedThinCstr {}
-
-
-pub fn cstr(s: &str) -> SharedThinCstr {
-    assert_eq!(s.as_bytes()[s.len() - 1], 0);
-    unsafe { SharedThinCstr::from_ptr(NonNull::new(s.as_ptr() as _).unwrap()) }
-}
+impl<'a> Eq for SharedThinCstr<'a> {}
 
 #[repr(transparent)]
 pub(crate) struct SyncPtr<T>(pub(crate) *mut T);

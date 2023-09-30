@@ -13,7 +13,7 @@ pub unsafe extern "C" fn puts(s: *const c_char) -> i32 {
 // PRINTF:
 
 #[no_mangle]
-pub unsafe extern "C" fn __printf_chk(_flag: c_int, format: *const c_char, mut args: ...) -> c_int {
+pub unsafe extern "C" fn __printf_chk(_flag: c_int, format: *const u8, mut args: ...) -> c_int {
     let mut sink = WriteCounter(stdout, 0);
 
     let result = libuwuc::fmt::printf::printf_generic(

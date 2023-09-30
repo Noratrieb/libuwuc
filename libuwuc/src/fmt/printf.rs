@@ -4,8 +4,8 @@ use crate::{io::IoWrite, utils::SharedThinCstr};
 
 pub unsafe fn printf_generic(
     mut sink: impl IoWrite,
-    format: SharedThinCstr,
-    args: VaList<'_, '_>,
+    format: SharedThinCstr<'_>,
+    _args: VaList<'_, '_>,
 ) -> Result<(), i32> {
     let mut chars = format.into_iter();
 
@@ -31,7 +31,7 @@ mod tests {
 
     use super::printf_generic;
 
-    unsafe extern "C" fn test_printf(expected: &str, fmt: SharedThinCstr, mut args: ...) {
+    unsafe extern "C" fn test_printf(expected: &str, fmt: SharedThinCstr<'_>, mut args: ...) {
         let mut sink = Vec::new();
 
         printf_generic(&mut sink, fmt, args.as_va_list()).unwrap();
@@ -41,12 +41,14 @@ mod tests {
     }
 
     #[test]
+    #[cfg_attr(miri, ignore = "variadic")]
     fn empty_format() {
-        unsafe { test_printf("\0", cstr("\0")) }
+        unsafe { test_printf("\0", cstr!("")) }
     }
 
     #[test]
+    #[cfg_attr(miri, ignore = "variadic")]
     fn constant_string() {
-        unsafe { test_printf("hello, world\0", cstr("hello, world\0")) }
+        unsafe { test_printf("hello, world\0", cstr!("hello, world")) }
     }
 }
