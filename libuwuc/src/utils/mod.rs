@@ -83,7 +83,7 @@ impl From<SharedThinCstr> for &CStr {
 
 impl PartialEq for SharedThinCstr {
     fn eq(&self, other: &Self) -> bool {
-        self.into_iter().eq(other.into_iter())
+        self.into_iter().eq(*other)
     }
 }
 

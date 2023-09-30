@@ -1,11 +1,15 @@
 #![no_std]
 #![feature(panic_info_message)]
+#![deny(clippy::no_mangle_with_rust_abi)]
 
+mod rt;
 mod stdio;
+mod stdlib;
 mod string;
 
 // libcore seems to require this symbol, even though it's unused.
 #[no_mangle]
+#[allow(clippy::no_mangle_with_rust_abi)]
 fn rust_eh_personality() {
     unsafe {
         libuwuc::trap!();

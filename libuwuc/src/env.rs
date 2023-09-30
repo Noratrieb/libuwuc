@@ -47,6 +47,7 @@ impl Iterator for EnvP {
     }
 }
 
+#[allow(unused)]
 pub(crate) fn debug_env() {
     println!("start vars");
     global::get().for_each(|s| {

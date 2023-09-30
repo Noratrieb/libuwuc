@@ -29,7 +29,7 @@ macro_rules! println {
 pub use println;
 
 pub unsafe fn write_all(fd: i32, mut buf: &[u8]) -> Result<(), i64> {
-    while buf.len() > 0 {
+    while !buf.is_empty() {
         let result = syscall::syscall!(syscall::SYS_WRITE, fd, buf.as_ptr(), buf.len()) as i64;
         if result < 0 {
             return Err(result);
