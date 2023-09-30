@@ -28,6 +28,56 @@ pub unsafe extern "C" fn __printf_chk(_flag: c_int, format: *const u8, mut args:
     }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn printf(format: *const u8, mut args: ...) -> c_int {
+    let mut sink = WriteCounter(stdout, 0);
+
+    let result = libuwuc::fmt::printf::printf_generic(
+        &mut sink,
+        SharedThinCstr::from_raw(format),
+        args.as_va_list(),
+    );
+
+    match result {
+        Ok(()) => sink.1 as _,
+        Err(err) => err,
+    }
+}
+
+
+#[no_mangle]
+pub unsafe extern "C" fn __fprintf_chk(file: &FileStream, _flag: c_int, format: *const u8, mut args: ...) -> c_int {
+    let mut sink = WriteCounter(file, 0);
+
+    let result = libuwuc::fmt::printf::printf_generic(
+        &mut sink,
+        SharedThinCstr::from_raw(format),
+        args.as_va_list(),
+    );
+
+    match result {
+        Ok(()) => sink.1 as _,
+        Err(err) => err,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn fprintf(file: &FileStream, format: *const u8, mut args: ...) -> c_int {
+    let mut sink = WriteCounter(file, 0);
+
+    let result = libuwuc::fmt::printf::printf_generic(
+        &mut sink,
+        SharedThinCstr::from_raw(format),
+        args.as_va_list(),
+    );
+
+    match result {
+        Ok(()) => sink.1 as _,
+        Err(err) => err,
+    }
+}
+
+
 // STREAMS:
 
 #[no_mangle]
