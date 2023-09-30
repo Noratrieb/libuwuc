@@ -63,7 +63,6 @@ pub fn getenv(name: SharedThinCstr) -> Option<SharedThinCstr> {
 fn getenv_inner(mut envp: EnvP, name: SharedThinCstr) -> Option<SharedThinCstr> {
     let mut eq_idx = 0;
     envp.find(|env| {
-        println!("trying {env:?}");
         // Find ENV
         // EN=x
         // ENV=x   <- this one

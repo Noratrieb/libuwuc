@@ -13,7 +13,7 @@ pub(crate) unsafe extern "C" fn start(argc: u64, argv: *const *const c_char, rsp
         fn main(argc: c_int, argv: *const *const c_char) -> c_int;
     }
 
-    crate::env::debug_env();
+    // crate::env::debug_env();
 
     let result = main(argc as i32, argv);
 

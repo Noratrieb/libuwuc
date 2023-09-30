@@ -4,7 +4,7 @@
 #[cfg(test)]
 extern crate std;
 
-mod basic_mem;
+pub mod mem;
 pub mod env;
 pub mod io;
 pub mod start;

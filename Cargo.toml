@@ -1,18 +1,9 @@
-[package]
-name = "libuwuc"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace]
+members = ["libuwuc", "c"]
+resolver = "2"
 
 [profile.dev]
 panic = "abort"
 
 [profile.release]
 panic = "abort"
-
-[dependencies]
-cfg-if = "1.0.0"
-
-[features]
-export_symbols = []

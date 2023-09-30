@@ -6,7 +6,7 @@ use core::ffi::c_char;
 
 use libuwuc::{println, utils::SharedThinCstr};
 
-extern crate libuwuc;
+extern crate c;
 
 #[panic_handler]
 #[cfg(not(test))]
@@ -26,12 +26,4 @@ extern "C" fn main(_argc: i32, _argv: *const *const c_char) -> i32 {
     let pwd = libuwuc::env::getenv(SharedThinCstr::from_array(b"PWD\0"));
     println!("PWD={pwd:?}");
     0
-}
-
-// libcore seems to require this symbol, even though it's unused.
-#[no_mangle]
-fn rust_eh_personality() {
-    unsafe {
-        libuwuc::trap!();
-    }
 }

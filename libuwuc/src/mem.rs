@@ -1,5 +1,5 @@
-#[no_mangle]
-pub(crate) unsafe extern "C" fn memset(ptr: *mut u8, constant: u8, len: usize) {
+#[inline]
+pub unsafe fn memset(ptr: *mut u8, constant: u8, len: usize) {
     for i in 0..len {
         unsafe {
             *ptr.add(i) = constant;
@@ -7,8 +7,8 @@ pub(crate) unsafe extern "C" fn memset(ptr: *mut u8, constant: u8, len: usize) {
     }
 }
 
-#[no_mangle]
-pub(crate) unsafe extern "C" fn strlen(mut s: *const u8) -> usize {
+#[inline]
+pub unsafe fn strlen(mut s: *const u8) -> usize {
     let mut len = 0;
     while s.read() != 0 {
         len += 1;
