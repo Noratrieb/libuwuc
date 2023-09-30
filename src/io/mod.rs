@@ -12,7 +12,7 @@ impl core::fmt::Write for Printer {
         unsafe {
             while s.len() > 0 {
                 let result =
-                    syscall::syscall!(syscall::SYS_WRITE, STDIN, s.as_ptr(), s.len()) as i64;
+                    syscall::syscall!(syscall::SYS_WRITE, STDOUT, s.as_ptr(), s.len()) as i64;
                 if result < 0 {
                     return Err(core::fmt::Error);
                 }

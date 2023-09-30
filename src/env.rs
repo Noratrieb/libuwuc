@@ -1,8 +1,4 @@
-use core::{
-    ffi::{c_char, CStr},
-    iter,
-    ptr::NonNull,
-};
+use core::{ffi::CStr, ptr::NonNull};
 
 use crate::{println, utils::SharedThinCstr};
 
@@ -67,6 +63,7 @@ pub fn getenv(name: SharedThinCstr) -> Option<SharedThinCstr> {
 fn getenv_inner(mut envp: EnvP, name: SharedThinCstr) -> Option<SharedThinCstr> {
     let mut eq_idx = 0;
     envp.find(|env| {
+        println!("trying {env:?}");
         // Find ENV
         // EN=x
         // ENV=x   <- this one
@@ -82,6 +79,9 @@ fn getenv_inner(mut envp: EnvP, name: SharedThinCstr) -> Option<SharedThinCstr> 
                 return true;
             }
             if name.is_none() || env == Some(b'=') {
+                return false;
+            }
+            if name != env {
                 return false;
             }
             eq_idx += 1;
@@ -152,6 +152,13 @@ mod tests {
     fn getenv_name_long() {
         with_envp(&["U=w"], |envp| {
             assert_eq!(super::getenv_inner(envp, cstr("LONG_NAME\0")), None);
+        })
+    }
+
+    #[test]
+    fn getenv_same_length() {
+        with_envp(&["OWO=a", "UWU=b"], |envp| {
+            assert_eq!(super::getenv_inner(envp, cstr("UWU\0")), Some(cstr("b\0")));
         })
     }
 }

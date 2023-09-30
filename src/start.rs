@@ -13,7 +13,7 @@ pub(crate) unsafe extern "C" fn start(argc: u64, argv: *const *const c_char, rsp
         fn main(argc: c_int, argv: *const *const c_char) -> c_int;
     }
 
-    // crate::env::debug_env();
+    crate::env::debug_env();
 
     let result = main(argc as i32, argv);
 
@@ -23,6 +23,7 @@ pub(crate) unsafe extern "C" fn start(argc: u64, argv: *const *const c_char, rsp
 pub fn exit(code: u64) -> ! {
     unsafe {
         crate::sys::syscall::syscall!(crate::sys::syscall::SYS_EXIT, code);
+        crate::sys::helpers::trap!();
         core::hint::unreachable_unchecked()
     }
 }
