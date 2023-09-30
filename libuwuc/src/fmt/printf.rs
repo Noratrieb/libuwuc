@@ -43,12 +43,12 @@ mod tests {
     #[test]
     #[cfg_attr(miri, ignore = "variadic")]
     fn empty_format() {
-        unsafe { test_printf("\0", cstr!("")) }
+        unsafe { test_printf("", cstr!("")) }
     }
 
     #[test]
     #[cfg_attr(miri, ignore = "variadic")]
     fn constant_string() {
-        unsafe { test_printf("hello, world\0", cstr!("hello, world")) }
+        unsafe { test_printf("hello, world", cstr!("hello, world")) }
     }
 }
