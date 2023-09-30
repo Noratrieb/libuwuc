@@ -1,3 +1,5 @@
+pub mod stream;
+
 use core::ffi::c_char;
 
 use crate::sys::syscall;
