@@ -1,4 +1,5 @@
 #![no_std]
+#![feature(c_variadic)]
 #![feature(panic_info_message)]
 #![deny(clippy::no_mangle_with_rust_abi)]
 

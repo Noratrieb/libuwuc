@@ -1,4 +1,7 @@
 pub mod stream;
+pub mod traits;
+
+pub use traits::IoWrite;
 
 use core::ffi::c_char;
 
@@ -30,13 +33,19 @@ macro_rules! println {
 }
 pub use println;
 
+pub unsafe fn write(fd: i32, buf: &[u8]) -> Result<usize, i32> {
+    let result = syscall::syscall!(syscall::SYS_WRITE, fd, buf.as_ptr(), buf.len()) as i64;
+    if result < 0 {
+        Err(result as _)
+    } else {
+        Ok(result as _)
+    }
+}
+
 pub unsafe fn write_all(fd: i32, mut buf: &[u8]) -> Result<(), i64> {
     while !buf.is_empty() {
-        let result = syscall::syscall!(syscall::SYS_WRITE, fd, buf.as_ptr(), buf.len()) as i64;
-        if result < 0 {
-            return Err(result);
-        }
-        buf = &buf[(result as usize)..];
+        let result = write(fd, buf)?;
+        buf = &buf[result..];
     }
     Ok(())
 }

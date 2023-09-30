@@ -1,6 +1,6 @@
 use core::ffi::c_int;
 
-use super::EOF;
+use super::{IoWrite, EOF};
 
 /// A `FILE`.
 #[repr(C)]
@@ -15,6 +15,12 @@ impl FileStream {
 
     fn write_byte(&self, c: u8) -> Result<(), i32> {
         unsafe { super::write_all(self.fd, &[c]).map_err(|e| e as _) }
+    }
+}
+
+impl IoWrite for &FileStream {
+    fn write(&mut self, buf: &[u8]) -> Result<usize, i32> {
+        unsafe { super::write(self.fd, buf) }
     }
 }
 

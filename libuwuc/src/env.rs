@@ -99,14 +99,9 @@ mod tests {
     use std::string::ToString;
     use std::{ffi::CString, vec::Vec};
 
-    use crate::utils::SharedThinCstr;
+    use crate::utils::{cstr, SharedThinCstr};
 
     use super::EnvP;
-
-    fn cstr(s: &str) -> SharedThinCstr {
-        assert_eq!(s.as_bytes()[s.len() - 1], 0);
-        unsafe { SharedThinCstr::from_ptr(NonNull::new(s.as_ptr() as _).unwrap()) }
-    }
 
     fn with_envp(env: &[&str], f: impl FnOnce(EnvP)) {
         let cstrs = env

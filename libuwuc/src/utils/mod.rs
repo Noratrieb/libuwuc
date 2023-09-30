@@ -20,6 +20,10 @@ impl SharedThinCstr {
         Self(ptr)
     }
 
+    pub unsafe fn from_raw(ptr: *const c_char) -> Self {
+        Self(NonNull::new_unchecked(ptr as _))
+    }
+
     pub fn from_array<const N: usize>(arr: &[u8; N]) -> Self {
         assert!(arr[N - 1] == 0);
         unsafe { Self(NonNull::new_unchecked(arr as *const u8 as *mut c_char)) }
@@ -35,7 +39,7 @@ impl SharedThinCstr {
 }
 
 impl IntoIterator for SharedThinCstr {
-    type Item = c_char;
+    type Item = u8;
 
     type IntoIter = CStrIter;
 
@@ -47,7 +51,7 @@ impl IntoIterator for SharedThinCstr {
 pub struct CStrIter(SharedThinCstr);
 
 impl Iterator for CStrIter {
-    type Item = c_char;
+    type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
         unsafe {
@@ -57,7 +61,7 @@ impl Iterator for CStrIter {
             }
 
             self.0 = self.0.add(1);
-            Some(c)
+            Some(c as u8)
         }
     }
 }
@@ -88,6 +92,12 @@ impl PartialEq for SharedThinCstr {
 }
 
 impl Eq for SharedThinCstr {}
+
+
+pub fn cstr(s: &str) -> SharedThinCstr {
+    assert_eq!(s.as_bytes()[s.len() - 1], 0);
+    unsafe { SharedThinCstr::from_ptr(NonNull::new(s.as_ptr() as _).unwrap()) }
+}
 
 #[repr(transparent)]
 pub(crate) struct SyncPtr<T>(pub(crate) *mut T);

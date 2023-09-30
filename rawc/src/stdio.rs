@@ -1,10 +1,31 @@
 use core::ffi::{c_char, c_int};
 
-use libuwuc::io::{stream::FileStream, STDERR, STDIN, STDOUT};
+use libuwuc::{
+    io::{stream::FileStream, traits::WriteCounter, STDERR, STDIN, STDOUT},
+    utils::SharedThinCstr,
+};
 
 #[no_mangle]
 pub unsafe extern "C" fn puts(s: *const c_char) -> i32 {
     libuwuc::io::puts(s)
+}
+
+// PRINTF:
+
+#[no_mangle]
+pub unsafe extern "C" fn __printf_chk(_flag: c_int, format: *const c_char, mut args: ...) -> c_int {
+    let mut sink = WriteCounter(stdout, 0);
+
+    let result = libuwuc::fmt::printf::printf_generic(
+        &mut sink,
+        SharedThinCstr::from_raw(format),
+        args.as_va_list(),
+    );
+
+    match result {
+        Ok(()) => sink.1 as _,
+        Err(err) => err,
+    }
 }
 
 // STREAMS:
