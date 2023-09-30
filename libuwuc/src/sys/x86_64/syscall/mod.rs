@@ -12,6 +12,9 @@ macro_rules! syscall {
             "syscall",
             in("rdi") $number,
             lateout("rax") out,
+            // rcx and r11 are clobbered https://github.com/torvalds/linux/blob/3b517966c5616ac011081153482a5ba0e91b17ff/tools/include/nolibc/arch-x86_64.h#L19
+            out("rcx") _,
+            out("r11") _,
         );
         out
     }};
@@ -22,6 +25,9 @@ macro_rules! syscall {
             in("rax") $number,
             in("rdi") $arg1,
             lateout("rax") out,
+            // rcx and r11 are clobbered
+            out("rcx") _,
+            out("r11") _,
         );
         out
     }};
@@ -33,6 +39,9 @@ macro_rules! syscall {
             in("rdi") $arg1,
             in("rsi") $arg2,
             lateout("rax") out,
+            // rcx and r11 are clobbered
+            out("rcx") _,
+            out("r11") _,
         );
         out
     }};
@@ -45,6 +54,9 @@ macro_rules! syscall {
             in("rsi") $arg2,
             in("rdx") $arg3,
             lateout("rax") out,
+            // rcx and r11 are clobbered
+            out("rcx") _,
+            out("r11") _,
         );
         out
     }};
@@ -58,6 +70,9 @@ macro_rules! syscall {
             in("rdx") $arg3,
             in("r10") $arg4,
             lateout("rax") out,
+            // rcx and r11 are clobbered
+            out("rcx") _,
+            out("r11") _,
         );
         out
     }};
@@ -72,6 +87,9 @@ macro_rules! syscall {
             in("r10") $arg4,
             in("r8") $arg5,
             lateout("rax") out,
+            // rcx and r11 are clobbered
+            out("rcx") _,
+            out("r11") _,
         );
         out
     }};
@@ -87,6 +105,9 @@ macro_rules! syscall {
             in("r8") $arg5,
             in("r9") $arg6,
             lateout("rax") out,
+            // rcx and r11 are clobbered
+            out("rcx") _,
+            out("r11") _,
         );
         out
     }};
