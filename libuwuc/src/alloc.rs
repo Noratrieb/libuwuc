@@ -21,18 +21,22 @@ fn init() {
     match state {
         Ok(_) => unsafe {
             const HEAP_SIZE: usize = 0x100000;
+            let map_private = 0x0002;
             let map_anon = 0x20;
             let prot_read = 1;
             let prod_write = 2;
 
-            let start = mmap(
+            let start = mmap_sys(
                 core::ptr::null(),
                 HEAP_SIZE,
                 prot_read | prod_write,
-                map_anon,
+                map_anon | map_private,
                 0,
                 0,
             );
+            if (start as isize) < 0 {
+                todo!("mmap failed");
+            }
             ALLOCATOR.lock().init(start, HEAP_SIZE);
 
             INIT_STATE.store(INIT, Ordering::Release);
@@ -80,7 +84,8 @@ pub unsafe fn free(ptr: *mut u8) {
     ALLOCATOR.dealloc(start, layout);
 }
 
-pub unsafe fn mmap(
+#[cfg_attr(miri, allow(unused_variables, unreachable_code))]
+pub unsafe fn mmap_sys(
     addr: *const u8,
     size: usize,
     prot: c_int,
@@ -107,7 +112,11 @@ pub unsafe fn mmap(
 #[cfg(test)]
 mod tests {
     #[test]
-    #[ignore = "uh"]
+    fn init() {
+        super::init();
+    }
+
+    #[test]
     fn malloc_free() {
         unsafe {
             let x = super::malloc_zeroed(10, 8);
