@@ -15,7 +15,9 @@ macro_rules! cstr {
     ($value:literal) => {{
         let s = concat!($value, "\0");
         #[allow(unused_unsafe)]
-        unsafe { $crate::utils::SharedThinCstr::from_raw(s.as_ptr().cast()) }
+        unsafe {
+            $crate::utils::SharedThinCstr::from_raw(s.as_ptr().cast())
+        }
     }};
 }
 
@@ -24,6 +26,10 @@ pub use cstr;
 impl<'a> SharedThinCstr<'a> {
     pub unsafe fn from_raw(ptr: *const u8) -> Self {
         Self(NonNull::new_unchecked(ptr as *mut u8), PhantomData)
+    }
+
+    pub unsafe fn from_nullable(ptr: *const u8) -> Option<Self> {
+        NonNull::new(ptr as *mut u8).map(|ptr| Self(ptr, PhantomData))
     }
 
     pub fn as_ptr(self) -> NonNull<u8> {

@@ -44,9 +44,13 @@ pub unsafe extern "C" fn printf(format: *const u8, mut args: ...) -> c_int {
     }
 }
 
-
 #[no_mangle]
-pub unsafe extern "C" fn __fprintf_chk(_flag: c_int, file: &FileStream, format: *const u8, mut args: ...) -> c_int {
+pub unsafe extern "C" fn __fprintf_chk(
+    _flag: c_int,
+    file: &FileStream,
+    format: *const u8,
+    mut args: ...
+) -> c_int {
     let mut sink = WriteCounter(file, 0);
 
     let result = libuwuc::fmt::printf::printf_generic(
@@ -77,7 +81,6 @@ pub unsafe extern "C" fn fprintf(file: &FileStream, format: *const u8, mut args:
     }
 }
 
-
 // STREAMS:
 
 #[no_mangle]
@@ -88,16 +91,36 @@ pub static stdout: &FileStream = &FileStream::from_raw_fd(STDOUT);
 pub static stderr: &FileStream = &FileStream::from_raw_fd(STDERR);
 
 #[no_mangle]
+pub unsafe extern "C" fn fgetc(_stream: *mut FileStream) -> c_int {
+    todo!()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ungetc(_c: c_int, _stream: *mut FileStream) -> c_int {
+    todo!()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn fputc(c: c_int, stream: *mut FileStream) -> c_int {
     libuwuc::io::stream::fputc(c as u8, &*stream)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn fread(
+    _ptr: *const u8,
+    _size: usize,
+    _nmemb: usize,
+    _stream: *mut FileStream,
+) -> usize {
+    todo!()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn fwrite(
     ptr: *const u8,
     size: usize,
-    nitems: usize,
+    nmemb: usize,
     stream: &FileStream,
 ) -> usize {
-    libuwuc::io::stream::fwrite(ptr, size, nitems, stream)
+    libuwuc::io::stream::fwrite(ptr, size, nmemb, stream)
 }
