@@ -2,3 +2,5 @@
 /example-user/target
 /tests/target
 /.vscode
+a.out
+/*.c
