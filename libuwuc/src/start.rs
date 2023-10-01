@@ -4,7 +4,9 @@ use crate::utils::SharedThinCstr;
 
 /// The entrypoint of the program.
 /// This is called by a bit of assembly handling architecture-specific _start.
-pub(crate) unsafe extern "C" fn start(argc: u64, argv: *const *const c_char, rsp: u64) -> ! {
+pub(crate) unsafe extern "C" fn start(rsp: u64) -> ! {
+    let argc = (rsp as *const u64).read();
+    let argv = (rsp + 8) as *const *const c_char;
     let envp = (8 + 8 * argc + rsp + 8) as *mut Option<SharedThinCstr<'static>>;
 
     crate::env::init(envp);

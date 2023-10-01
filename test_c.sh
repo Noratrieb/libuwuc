@@ -21,13 +21,18 @@ for test in tests/c/*; do
         exit 1
     fi
 
+    printf "test $name "
+
     OUTPUT=$("$test_dir/$name")
     code="$?"
     if [ "$code" -ne "0" ]; then
+        echo -e "\e[31mFAIL\e[0m"
         echo "error: test failed with code $code: $test, running $test_dir/$name"
         echo "------ output:"
         echo "$OUTPUT"
         echo "-----"
+    else
+        echo -e "\e[32mPASS\e[0m"
     fi
 done
 

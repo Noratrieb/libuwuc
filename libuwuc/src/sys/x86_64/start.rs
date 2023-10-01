@@ -8,9 +8,7 @@ core::arch::global_asm!(
     "mov rbp, 0",
     // We're off to a good start already.
     // Pass the variables to the start function arguments.
-    "mov rdi, [rsp]",       // &argc = rsp
-    "mov rsi, [rsp+8]",     // &argv = rsp+8
-    "mov rdx, rsp",
+    "mov rdi, rsp",
 
     // The stack will be 16-byte aligned at process entry already.
     // So we're good to go!

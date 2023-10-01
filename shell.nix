@@ -7,5 +7,6 @@
     export PATH=$PATH:''${CARGO_HOME:-~/.cargo}/bin
   '';
   packages = (with pkgs; [
+    gef
   ]);
 }

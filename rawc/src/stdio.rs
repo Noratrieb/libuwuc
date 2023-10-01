@@ -46,7 +46,7 @@ pub unsafe extern "C" fn printf(format: *const u8, mut args: ...) -> c_int {
 
 
 #[no_mangle]
-pub unsafe extern "C" fn __fprintf_chk(file: &FileStream, _flag: c_int, format: *const u8, mut args: ...) -> c_int {
+pub unsafe extern "C" fn __fprintf_chk(_flag: c_int, file: &FileStream, format: *const u8, mut args: ...) -> c_int {
     let mut sink = WriteCounter(file, 0);
 
     let result = libuwuc::fmt::printf::printf_generic(
