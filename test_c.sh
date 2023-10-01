@@ -12,8 +12,18 @@ clean() {
 
 for test in tests/c/*; do
     name=$(basename $test .c)
+    printf "test $name "
 
-    "$SCRIPT_DIR/uwuc-gcc" "$test" -o "$test_dir/$name"
+    flags=$(grep "//@flags: " "$test" | sed 's#//@flags: ##')
+
+    grep "//@ignore" "$test" >/dev/null
+    ignore=$?
+    if [ "$ignore" -eq "0" ]; then
+        echo -e "\e[33mIGNORE\e[0m"
+        continue
+    fi
+
+    "$SCRIPT_DIR/uwuc-gcc" $flags "$test" -o "$test_dir/$name"
 
     if [ "$?" -ne "0" ]; then
         echo "error: failed to compile test $test"
@@ -21,16 +31,15 @@ for test in tests/c/*; do
         exit 1
     fi
 
-    printf "test $name "
 
     OUTPUT=$("$test_dir/$name")
     code="$?"
     if [ "$code" -ne "0" ]; then
         echo -e "\e[31mFAIL\e[0m"
-        echo "error: test failed with code $code: $test, running $test_dir/$name"
-        echo "------ output:"
-        echo "$OUTPUT"
-        echo "-----"
+        echo "error: test failed with code $code: $test, compiled with $flags"
+        echo "------output"
+        echo -n "$OUTPUT"
+        echo "------"
     else
         echo -e "\e[32mPASS\e[0m"
     fi

@@ -2,6 +2,7 @@
   buildInputs = with pkgs; [
     rustup
     gcc
+    clang_16
   ];
   shellHook = ''
     export PATH=$PATH:''${CARGO_HOME:-~/.cargo}/bin
