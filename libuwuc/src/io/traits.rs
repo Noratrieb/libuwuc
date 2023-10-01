@@ -1,3 +1,5 @@
+use core::fmt;
+
 pub trait IoWrite {
     fn write(&mut self, buf: &[u8]) -> Result<usize, i32>;
 
@@ -11,6 +13,43 @@ pub trait IoWrite {
 
     fn write_byte(&mut self, byte: u8) -> Result<(), i32> {
         self.write_all(&[byte])
+    }
+
+    fn write_fmt(&mut self, fmt: fmt::Arguments<'_>) -> Result<(), i32> {
+        // Create a shim which translates a Write to a fmt::Write and saves
+        // off I/O errors. instead of discarding them
+        struct Adapter<'a, T: ?Sized> {
+            inner: &'a mut T,
+            error: Result<(), i32>,
+        }
+
+        impl<T: IoWrite + ?Sized> fmt::Write for Adapter<'_, T> {
+            fn write_str(&mut self, s: &str) -> fmt::Result {
+                match self.inner.write_all(s.as_bytes()) {
+                    Ok(()) => Ok(()),
+                    Err(e) => {
+                        self.error = Err(e);
+                        Err(fmt::Error)
+                    }
+                }
+            }
+        }
+
+        let mut output = Adapter {
+            inner: self,
+            error: Ok(()),
+        };
+        match fmt::write(&mut output, fmt) {
+            Ok(()) => Ok(()),
+            Err(..) => {
+                // check if the error came from the underlying `Write` or not
+                if output.error.is_err() {
+                    output.error
+                } else {
+                    Err(-1)
+                }
+            }
+        }
     }
 }
 

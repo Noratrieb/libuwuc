@@ -5,16 +5,36 @@ use crate::{io::IoWrite, utils::SharedThinCstr};
 pub unsafe fn printf_generic(
     mut sink: impl IoWrite,
     format: SharedThinCstr<'_>,
-    _args: VaList<'_, '_>,
+    mut args: VaList<'_, '_>,
 ) -> Result<(), i32> {
     let mut chars = format.into_iter();
 
     while let Some(c) = chars.next() {
         if c == b'%' {
-            todo!();
+            let Some(c) = chars.next() else {
+                return Err(-1);
+            };
+            // todo: do this properly
+            match c {
+                b'c' => {
+                    let char = args.arg::<u8>();
+                    write!(sink, "{}", char as char)?;
+                }
+                b'l' => {
+                    let Some(c) = chars.next() else {
+                        return Err(-1);
+                    };
+                    if c != b'd' {
+                        todo!();
+                    }
+                    let long = args.arg::<i64>();
+                    write!(sink, "{}", long)?;
+                }
+                _ => todo!(),
+            };
+        } else {
+            sink.write_byte(c)?;
         }
-
-        sink.write_byte(c)?;
     }
 
     Ok(())
@@ -50,5 +70,17 @@ mod tests {
     #[cfg_attr(miri, ignore = "variadic")]
     fn constant_string() {
         unsafe { test_printf("hello, world", cstr!("hello, world")) }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore = "variadic")]
+    fn char() {
+        unsafe { test_printf("a", cstr!("%c"), b'a' as u64) }
+    }
+
+    #[test]
+    #[cfg_attr(miri, ignore = "variadic")]
+    fn long() {
+        unsafe { test_printf("234", cstr!("%ld"), 234_u64) }
     }
 }
