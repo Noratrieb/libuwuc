@@ -3,6 +3,7 @@ use core::ffi::{c_char, c_int};
 use libuwuc::{
     io::{stream::FileStream, traits::WriteCounter, STDERR, STDIN, STDOUT},
     utils::SharedThinCstr,
+    error::IntoOkOrErrno
 };
 
 #[no_mangle]
@@ -22,10 +23,7 @@ pub unsafe extern "C" fn __printf_chk(_flag: c_int, format: *const u8, mut args:
         args.as_va_list(),
     );
 
-    match result {
-        Ok(()) => sink.1 as _,
-        Err(err) => err,
-    }
+    result.map(|()| sink.1 as i32).into_ok_or_errno()
 }
 
 #[no_mangle]
@@ -38,10 +36,7 @@ pub unsafe extern "C" fn printf(format: *const u8, mut args: ...) -> c_int {
         args.as_va_list(),
     );
 
-    match result {
-        Ok(()) => sink.1 as _,
-        Err(err) => err,
-    }
+    result.map(|()| sink.1 as i32).into_ok_or_errno()
 }
 
 #[no_mangle]
@@ -59,10 +54,7 @@ pub unsafe extern "C" fn __fprintf_chk(
         args.as_va_list(),
     );
 
-    match result {
-        Ok(()) => sink.1 as _,
-        Err(err) => err,
-    }
+    result.map(|()| sink.1 as i32).into_ok_or_errno()
 }
 
 #[no_mangle]
@@ -75,10 +67,7 @@ pub unsafe extern "C" fn fprintf(file: &FileStream, format: *const u8, mut args:
         args.as_va_list(),
     );
 
-    match result {
-        Ok(()) => sink.1 as _,
-        Err(err) => err,
-    }
+    result.map(|()| sink.1 as i32).into_ok_or_errno()
 }
 
 // STREAMS:

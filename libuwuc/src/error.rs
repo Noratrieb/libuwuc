@@ -17,6 +17,37 @@ pub fn set_errno(errno: i32) {
     unsafe { ERRNO.0.get().write(errno) }
 }
 
+pub trait IntoOkOrErrno {
+    type Int: ReturnInt;
+    fn into_ok_or_errno(self) -> Self::Int;
+}
+
+impl<T: ReturnInt> IntoOkOrErrno for Result<T, i32> {
+    type Int = T;
+    fn into_ok_or_errno(self) -> Self::Int {
+        self.unwrap_or_else(|err| {
+            set_errno(err);
+            T::negative_one()
+        })
+    }
+}
+
+pub trait ReturnInt {
+    fn negative_one() -> Self;
+}
+
+macro_rules! return_int_impl_s {
+    ($($ty:ty)*) => {
+        $(impl ReturnInt for $ty {
+            fn negative_one() -> Self {
+                -1
+            }
+        })*
+    };
+}
+
+return_int_impl_s!(i8 i16 i32 i64 isize);
+
 pub const EPERM: i32 = 1; /* Operation not permitted */
 pub const ENOENT: i32 = 2; /* No such file or directory */
 pub const ESRCH: i32 = 3; /* No such process */
