@@ -13,7 +13,6 @@ pub unsafe extern "C" fn memcmp(s1: *const u8, s2: *const u8, size: usize) -> i3
     libuwuc::mem::memcmp(s1, s2, size)
 }
 
-
 #[no_mangle]
 pub unsafe extern "C" fn bcmp(s1: *const u8, s2: *const u8, size: usize) -> i32 {
     libuwuc::mem::memcmp(s1, s2, size)

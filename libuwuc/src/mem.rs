@@ -79,7 +79,7 @@ mod tests {
     fn memcmp_eq_one() {
         let a = [1];
         let b = [1];
-        let result = unsafe { super::memcmp(a.as_ptr(), b.as_ptr(), 1)};
+        let result = unsafe { super::memcmp(a.as_ptr(), b.as_ptr(), 1) };
         assert_eq!(result, 0);
     }
 
@@ -103,7 +103,7 @@ mod tests {
     fn memcmp_lt_one() {
         let a = [0];
         let b = [1];
-        let result = unsafe { super::memcmp(a.as_ptr(), b.as_ptr(), 1)};
+        let result = unsafe { super::memcmp(a.as_ptr(), b.as_ptr(), 1) };
         assert_eq!(result, -1);
     }
 
@@ -127,7 +127,7 @@ mod tests {
     fn memcmp_gt_one() {
         let a = [255];
         let b = [1];
-        let result = unsafe { super::memcmp(a.as_ptr(), b.as_ptr(), 1)};
+        let result = unsafe { super::memcmp(a.as_ptr(), b.as_ptr(), 1) };
         assert_eq!(result, 1);
     }
 

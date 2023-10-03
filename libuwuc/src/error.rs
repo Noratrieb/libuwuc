@@ -1,18 +1,20 @@
 use core::{cell::UnsafeCell, ptr::addr_of};
 
-#[thread_local]
-static ERRNO: UnsafeCell<i32> = UnsafeCell::new(0);
+use crate::utils::SyncUnsafeCell;
+
+// Todo: This should be a thread local once we have threads.
+static ERRNO: SyncUnsafeCell<i32> = SyncUnsafeCell(UnsafeCell::new(0));
 
 pub fn errno_location() -> *const i32 {
     addr_of!(ERRNO).cast()
 }
 
 pub fn errno() -> i32 {
-    unsafe { *ERRNO.get() }
+    unsafe { *ERRNO.0.get() }
 }
 
 pub fn set_errno(errno: i32) {
-    unsafe { ERRNO.get().write(errno) }
+    unsafe { ERRNO.0.get().write(errno) }
 }
 
 pub const EPERM: i32 = 1; /* Operation not permitted */
