@@ -6,7 +6,10 @@ pub use traits::IoWrite;
 
 use core::ffi::c_char;
 
-use crate::{error::Error, sys::syscall};
+use crate::{
+    error::{Error, SyscallResultExt},
+    sys::syscall,
+};
 
 pub const STDIN: i32 = 0;
 pub const STDOUT: i32 = 1;
@@ -35,12 +38,7 @@ macro_rules! println {
 pub use println;
 
 pub unsafe fn sys_write(fd: i32, buf: &[u8]) -> Result<usize, Error> {
-    let result = syscall::syscall!(syscall::SYS_WRITE, fd, buf.as_ptr(), buf.len()) as i64;
-    if result < 0 {
-        Err(Error(result as _))
-    } else {
-        Ok(result as _)
-    }
+    syscall::syscall!(syscall::SYS_WRITE, fd, buf.as_ptr(), buf.len()).syscall_resultify()
 }
 
 pub unsafe fn write_all(fd: i32, mut buf: &[u8]) -> Result<(), Error> {

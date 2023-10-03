@@ -29,6 +29,42 @@ impl Debug for Error {
     }
 }
 
+pub trait SyscallResultExt: Sized {
+    fn syscall_resultify<N: FromSyscall>(self) -> Result<N, Error>;
+}
+
+pub trait FromSyscall {
+    fn from_isize(n: isize) -> Self;
+}
+
+macro_rules! usize_int_impl {
+    ($($ty:ty)*) => {
+        $(impl FromSyscall for $ty {
+            fn from_isize(n: isize) -> Self {
+                n as _
+            }
+        })*
+    };
+}
+
+usize_int_impl!(isize usize u64 i64 u32 i32);
+
+impl FromSyscall for Fd {
+    fn from_isize(n: isize) -> Self {
+        Self(n as _)
+    }
+}
+
+impl SyscallResultExt for isize {
+    fn syscall_resultify<N: FromSyscall>(self) -> Result<N, Error> {
+        if (-4096..0).contains(&self) {
+            Err(Error(-self as i32))
+        } else {
+            Ok(N::from_isize(self))
+        }
+    }
+}
+
 pub trait IntoOkOrErrno {
     type Int: ReturnInt;
     fn into_ok_or_errno(self) -> Self::Int;

@@ -1,4 +1,7 @@
-use crate::{utils::SharedThinCstr, println, error::Error};
+use crate::{
+    error::{Error, SyscallResultExt},
+    utils::SharedThinCstr,
+};
 
 #[repr(transparent)]
 pub struct Fd(pub i32);
@@ -8,13 +11,9 @@ pub fn open(arg: SharedThinCstr<'_>, flags: i32) -> Result<Fd, Error> {
 }
 
 pub fn sys_open(arg: SharedThinCstr<'_>, flags: i32) -> Result<Fd, Error> {
-    let fd = unsafe { crate::syscall::syscall!(crate::syscall::SYS_OPEN, arg.as_raw(), flags) };
-
-    if fd < 0 {
-        println!("fd: {fd}");
+    unsafe {
+        crate::syscall::syscall!(crate::syscall::SYS_OPEN, arg.as_raw(), flags).syscall_resultify()
     }
-
-    todo!()
 }
 
 pub const O_ACCMODE: i32 = 0o0003;
