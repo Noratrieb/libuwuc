@@ -1,14 +1,21 @@
 use core::ffi::{c_char, c_int};
 
 use libuwuc::{
-    io::{stream::FileStream, traits::WriteCounter, STDERR, STDIN, STDOUT},
+    error::IntoOkOrErrno,
+    io::{fd::Fd, stream::FileStream, traits::WriteCounter, STDERR, STDIN, STDOUT},
     utils::SharedThinCstr,
-    error::IntoOkOrErrno
 };
 
 #[no_mangle]
 pub unsafe extern "C" fn puts(s: *const c_char) -> i32 {
     libuwuc::io::puts(s)
+}
+
+// RAW FD:
+
+#[no_mangle]
+pub unsafe extern "C" fn open(path: SharedThinCstr, flags: i32) -> Fd {
+    libuwuc::io::fd::open(path, flags).into_ok_or_errno()
 }
 
 // PRINTF:
@@ -78,6 +85,14 @@ pub static stdin: &FileStream = &FileStream::from_raw_fd(STDIN);
 pub static stdout: &FileStream = &FileStream::from_raw_fd(STDOUT);
 #[no_mangle]
 pub static stderr: &FileStream = &FileStream::from_raw_fd(STDERR);
+
+#[no_mangle]
+pub unsafe extern "C" fn fopen<'a>(
+    pathname: SharedThinCstr,
+    mode: SharedThinCstr,
+) -> Option<&'a FileStream> {
+    todo!()
+}
 
 #[no_mangle]
 pub unsafe extern "C" fn fgetc(_stream: *mut FileStream) -> c_int {

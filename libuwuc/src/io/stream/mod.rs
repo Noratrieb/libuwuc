@@ -1,4 +1,8 @@
+pub mod file;
+
 use core::ffi::c_int;
+
+use crate::{error::Error, io::stream::file::OpenMode, utils::SharedThinCstr};
 
 use super::{IoWrite, EOF};
 
@@ -13,15 +17,26 @@ impl FileStream {
         Self { fd }
     }
 
-    fn write_byte(&self, c: u8) -> Result<(), i32> {
-        unsafe { super::write_all(self.fd, &[c]).map_err(|e| e as _) }
+    fn write_byte(&self, c: u8) -> Result<(), Error> {
+        unsafe { super::write_all(self.fd, &[c]) }
     }
 }
 
 impl IoWrite for &FileStream {
-    fn write(&mut self, buf: &[u8]) -> Result<usize, i32> {
-        unsafe { super::write(self.fd, buf) }
+    fn write(&mut self, buf: &[u8]) -> Result<usize, Error> {
+        unsafe { super::sys_write(self.fd, buf) }
     }
+}
+
+pub unsafe fn fopen<'a>(
+    pathname: SharedThinCstr<'_>,
+    mode: SharedThinCstr<'_>,
+) -> Result<&'a FileStream, Error> {
+    let Ok(mode) = OpenMode::parse(mode) else {
+        return Err(Error::INVAL);
+    };
+
+    todo!()
 }
 
 pub fn fputc(c: u8, stream: &FileStream) -> i32 {

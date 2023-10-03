@@ -9,5 +9,6 @@
   '';
   packages = (with pkgs; [
     gef
+    rust-bindgen
   ]);
 }

@@ -26,5 +26,5 @@ fn handler(arg: &core::panic::PanicInfo) -> ! {
     if let Some(loc) = arg.location() {
         libuwuc::io::println!("  at {}:{}:{}", loc.file(), loc.line(), loc.column());
     }
-    libuwuc::start::exit(1);
+    libuwuc::start::sys_exit(1);
 }

@@ -1,6 +1,6 @@
 use core::ffi::{c_int, c_long};
 
-use libuwuc::utils::SharedThinCstr;
+use libuwuc::{error::IntoOkOrErrno, utils::SharedThinCstr};
 
 #[no_mangle]
 pub unsafe extern "C" fn malloc(size: usize) -> *mut u8 {
@@ -14,7 +14,7 @@ pub unsafe extern "C" fn free(ptr: *mut u8) {
 
 #[no_mangle]
 pub unsafe extern "C" fn exit(code: i32) -> ! {
-    libuwuc::start::exit(code as i64 as _)
+    libuwuc::start::sys_exit(code as i64 as _)
 }
 
 #[no_mangle]
@@ -25,6 +25,7 @@ pub unsafe extern "C" fn strtol(nptr: *const u8, endptr: *mut *const u8, base: c
         core::mem::transmute::<*mut *const u8, Option<&mut Option<SharedThinCstr<'_>>>>(endptr),
         base,
     )
+    .into_ok_or_errno()
 }
 
 #[no_mangle]

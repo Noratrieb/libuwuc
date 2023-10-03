@@ -1,15 +1,12 @@
 use core::ffi::{c_int, c_long};
 
-use crate::{
-    error::{set_errno, EINVAL},
-    utils::SharedThinCstr,
-};
+use crate::{error::Error, utils::SharedThinCstr};
 
 pub fn parse_long<'a>(
     str: SharedThinCstr<'a>,
     endptr: Option<&mut Option<SharedThinCstr<'a>>>,
     base: c_int,
-) -> c_long {
+) -> Result<c_long, Error> {
     if base != 10 {
         todo!();
     }
@@ -47,13 +44,11 @@ pub fn parse_long<'a>(
         }
         Some((_, c)) if !c.is_ascii_digit() => {
             write_end(0);
-            set_errno(EINVAL);
-            return 0;
+            return Err(Error::INVAL);
         }
         None => {
             write_end(0);
-            set_errno(EINVAL);
-            return 0;
+            return Err(Error::INVAL);
         }
         Some((pos, _)) => {
             last_pos = *pos;
@@ -83,7 +78,7 @@ pub fn parse_long<'a>(
         }
     }
 
-    acc
+    Ok(acc)
 }
 
 #[cfg(test)]
@@ -92,7 +87,7 @@ mod tests {
 
     fn test_strtol(str: SharedThinCstr<'_>, expected: i64, base: i32, parsed_len: usize) {
         let mut end = None;
-        let result = super::parse_long(str, Some(&mut end), base);
+        let result = super::parse_long(str, Some(&mut end), base).unwrap();
         assert_eq!(result, expected);
         let end = end.unwrap();
         let read = end.as_raw() as usize - str.as_raw() as usize;

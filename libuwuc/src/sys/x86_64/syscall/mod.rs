@@ -7,7 +7,7 @@ pub use values::*;
 #[macro_export]
 macro_rules! syscall {
     ($number:expr) => {{
-        let out: u64;
+        let out: i64;
         ::core::arch::asm!(
             "syscall",
             in("rdi") $number,
@@ -19,7 +19,7 @@ macro_rules! syscall {
         out
     }};
     ($number:expr, $arg1:expr) => {{
-        let out: u64;
+        let out: i64;
         ::core::arch::asm!(
             "syscall",
             in("rax") $number,
@@ -32,7 +32,7 @@ macro_rules! syscall {
         out
     }};
     ($number:expr, $arg1:expr, $arg2:expr) => {{
-        let out: u64;
+        let out: i64;
         ::core::arch::asm!(
             "syscall",
             in("rax") $number,
@@ -46,7 +46,7 @@ macro_rules! syscall {
         out
     }};
     ($number:expr, $arg1:expr, $arg2:expr, $arg3:expr) => {{
-        let out: u64;
+        let out: i64;
         ::core::arch::asm!(
             "syscall",
             in("rax") $number,
@@ -61,7 +61,7 @@ macro_rules! syscall {
         out
     }};
     ($number:expr, $arg1:expr, $arg2:expr, $arg3:expr, $arg4:expr) => {{
-        let out: u64;
+        let out: i64;
         ::core::arch::asm!(
             "syscall",
             in("rax") $number,
@@ -77,7 +77,7 @@ macro_rules! syscall {
         out
     }};
     ($number:expr, $arg1:expr, $arg2:expr, $arg3:expr, $arg4:expr, $arg5:expr) => {{
-        let out: u64;
+        let out: i64;
         ::core::arch::asm!(
             "syscall",
             in("rax") $number,
@@ -94,7 +94,7 @@ macro_rules! syscall {
         out
     }};
     ($number:expr, $arg1:expr, $arg2:expr, $arg3:expr, $arg4:expr, $arg5:expr, $arg6:expr) => {{
-        let out: u64;
+        let out: i64;
         ::core::arch::asm!(
             "syscall",
             in("rax") $number,

@@ -1,18 +1,18 @@
 use core::ffi::VaList;
 
-use crate::{io::IoWrite, utils::SharedThinCstr};
+use crate::{io::IoWrite, utils::SharedThinCstr, error::Error};
 
 pub unsafe fn printf_generic(
     mut sink: impl IoWrite,
     format: SharedThinCstr<'_>,
     mut args: VaList<'_, '_>,
-) -> Result<(), i32> {
+) -> Result<(), Error> {
     let mut chars = format.into_iter();
 
     while let Some(c) = chars.next() {
         if c == b'%' {
             let Some(c) = chars.next() else {
-                return Err(-1);
+                return Err(Error::INVAL);
             };
             // todo: do this properly
             match c {
@@ -22,7 +22,7 @@ pub unsafe fn printf_generic(
                 }
                 b'l' => {
                     let Some(c) = chars.next() else {
-                        return Err(-1);
+                        return Err(Error::INVAL);
                     };
                     if c != b'd' {
                         todo!();

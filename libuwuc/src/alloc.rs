@@ -26,7 +26,7 @@ fn init() {
             let prot_read = 1;
             let prod_write = 2;
 
-            let start = mmap_sys(
+            let start = sys_mmap(
                 core::ptr::null(),
                 HEAP_SIZE,
                 prot_read | prod_write,
@@ -85,7 +85,7 @@ pub unsafe fn free(ptr: *mut u8) {
 }
 
 #[cfg_attr(miri, allow(unused_variables, unreachable_code))]
-pub unsafe fn mmap_sys(
+pub unsafe fn sys_mmap(
     addr: *const u8,
     size: usize,
     prot: c_int,

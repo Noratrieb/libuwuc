@@ -19,10 +19,10 @@ pub(crate) unsafe extern "C" fn start(rsp: u64) -> ! {
 
     let result = main(argc as i32, argv);
 
-    exit(result as u64);
+    sys_exit(result as u64);
 }
 
-pub fn exit(code: u64) -> ! {
+pub fn sys_exit(code: u64) -> ! {
     unsafe {
         crate::sys::syscall::syscall!(crate::sys::syscall::SYS_EXIT, code);
         crate::sys::helpers::trap!();
