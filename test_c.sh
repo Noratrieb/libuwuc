@@ -10,7 +10,7 @@ clean() {
     rm -r "${test_dir}"
 }
 
-for test in tests/c/*; do
+for test in "$SCRIPT_DIR"/tests/c/*; do
     name=$(basename $test .c)
     printf "test $name "
 
@@ -31,7 +31,7 @@ for test in tests/c/*; do
         exit 1
     fi
 
-
+    cd "$SCRIPT_DIR/tests" 
     OUTPUT=$("$test_dir/$name")
     code="$?"
     if [ "$code" -ne "0" ]; then

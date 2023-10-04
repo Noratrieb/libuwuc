@@ -11,14 +11,14 @@ use crate::{
     sys::syscall,
 };
 
-pub const STDIN: i32 = 0;
-pub const STDOUT: i32 = 1;
-pub const STDERR: i32 = 2;
+pub const STDIN: Fd = Fd(0);
+pub const STDOUT: Fd = Fd(1);
+pub const STDERR: Fd = Fd(2);
 
 pub const EOF: i32 = -1;
 
 #[doc(hidden)]
-pub struct Printer(pub i32);
+pub struct Printer(pub Fd);
 
 impl core::fmt::Write for Printer {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
@@ -37,13 +37,15 @@ macro_rules! println {
 }
 pub use println;
 
+use self::fd::Fd;
+
 pub unsafe fn sys_write(fd: i32, buf: &[u8]) -> Result<usize, Error> {
     syscall::syscall!(syscall::SYS_WRITE, fd, buf.as_ptr(), buf.len()).syscall_resultify()
 }
 
-pub unsafe fn write_all(fd: i32, mut buf: &[u8]) -> Result<(), Error> {
+pub unsafe fn write_all(fd: Fd, mut buf: &[u8]) -> Result<(), Error> {
     while !buf.is_empty() {
-        let result = sys_write(fd, buf)?;
+        let result = sys_write(fd.0, buf)?;
         buf = &buf[result..];
     }
     Ok(())

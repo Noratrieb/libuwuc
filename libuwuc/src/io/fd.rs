@@ -3,6 +3,7 @@ use crate::{
     utils::SharedThinCstr,
 };
 
+#[derive(Clone, Copy)]
 #[repr(transparent)]
 pub struct Fd(pub i32);
 

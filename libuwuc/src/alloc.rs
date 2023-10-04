@@ -6,6 +6,15 @@ use core::{
 
 use linked_list_allocator::LockedHeap;
 
+pub fn boxed<T>(value: T) -> *mut T {
+    let ptr = unsafe { alloc_zeroed(Layout::new::<T>()) }.cast::<T>();
+    if ptr.is_null() {
+        return ptr;
+    }
+    unsafe { ptr.write(value) };
+    ptr
+}
+
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
 const UNINIT: usize = 0;
@@ -51,7 +60,7 @@ fn init() {
     }
 }
 
-pub unsafe fn malloc_zeroed(size: usize, align: usize) -> *mut u8 {
+pub unsafe fn alloc_zeroed(layout: Layout) -> *mut u8 {
     /*
     |start  |align  |offset |RETURN VALUE
     */
@@ -59,7 +68,7 @@ pub unsafe fn malloc_zeroed(size: usize, align: usize) -> *mut u8 {
     init();
     let (layout, offset) = Layout::array::<usize>(3)
         .unwrap_unchecked()
-        .extend(Layout::from_size_align_unchecked(size, align))
+        .extend(layout)
         .unwrap_unchecked();
 
     let ptr = ALLOCATOR.alloc_zeroed(layout);
@@ -73,6 +82,10 @@ pub unsafe fn malloc_zeroed(size: usize, align: usize) -> *mut u8 {
     ret_ptr.cast::<usize>().sub(1).write(offset);
 
     ret_ptr
+}
+
+pub unsafe fn malloc_zeroed(size: usize, align: usize) -> *mut u8 {
+    alloc_zeroed(Layout::from_size_align_unchecked(size, align))
 }
 
 pub unsafe fn free(ptr: *mut u8) {

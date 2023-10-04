@@ -1,4 +1,4 @@
-use crate::utils::SharedThinCstr;
+use crate::{io::fd, utils::SharedThinCstr};
 
 #[derive(Debug, PartialEq)]
 pub enum OpenMode {
@@ -11,6 +11,17 @@ pub enum OpenMode {
 }
 
 impl OpenMode {
+    pub fn flags(self) -> i32 {
+        match self {
+            OpenMode::R => fd::O_RDONLY,
+            OpenMode::RP => fd::O_RDWR,
+            OpenMode::W => fd::O_WRONLY | fd::O_CREAT | fd::O_TRUNC,
+            OpenMode::WP => fd::O_RDWR | fd::O_CREAT | fd::O_TRUNC,
+            OpenMode::A => fd::O_WRONLY | fd::O_CREAT | fd::O_APPEND,
+            OpenMode::AP => fd::O_RDWR | fd::O_CREAT | fd::O_APPEND,
+        }
+    }
+
     pub fn parse(str: SharedThinCstr<'_>) -> Result<OpenMode, &'static str> {
         let mut buf = [0; 2];
         let mut i = 0;

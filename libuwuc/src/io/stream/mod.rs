@@ -1,19 +1,22 @@
 pub mod file;
 
-use core::ffi::c_int;
+use crate::{
+    alloc,
+    error::Error,
+    io::{fd, stream::file::OpenMode},
+    utils::SharedThinCstr,
+};
 
-use crate::{error::Error, io::stream::file::OpenMode, utils::SharedThinCstr};
-
-use super::{IoWrite, EOF};
+use super::{fd::Fd, IoWrite, EOF};
 
 /// A `FILE`.
 #[repr(C)]
 pub struct FileStream {
-    fd: c_int,
+    fd: Fd,
 }
 
 impl FileStream {
-    pub const fn from_raw_fd(fd: c_int) -> Self {
+    pub const fn from_raw_fd(fd: Fd) -> Self {
         Self { fd }
     }
 
@@ -24,7 +27,7 @@ impl FileStream {
 
 impl IoWrite for &FileStream {
     fn write(&mut self, buf: &[u8]) -> Result<usize, Error> {
-        unsafe { super::sys_write(self.fd, buf) }
+        unsafe { super::sys_write(self.fd.0, buf) }
     }
 }
 
@@ -36,7 +39,8 @@ pub unsafe fn fopen<'a>(
         return Err(Error::INVAL);
     };
 
-    todo!()
+    let fd = fd::open(pathname, mode.flags())?;
+    unsafe { Ok(&*alloc::boxed(FileStream { fd })) }
 }
 
 pub fn fputc(c: u8, stream: &FileStream) -> i32 {

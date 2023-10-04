@@ -1,14 +1,12 @@
 #include <stdlib.h>
+#include <assert.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   char *env = getenv("PATH");
-  if (!env) {
-    return 1;
-  }
+  assert(env && "PATH doesnt exist");
 
   char *env2 = getenv(
       "__some absolutely NONSENSE that no one would ever define please..");
-  if (env2) {
-    return 1;
-  }
+  assert(!env2 && "nonsense environment variable found");
 }

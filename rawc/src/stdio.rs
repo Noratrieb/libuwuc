@@ -91,7 +91,9 @@ pub unsafe extern "C" fn fopen<'a>(
     pathname: SharedThinCstr,
     mode: SharedThinCstr,
 ) -> Option<&'a FileStream> {
-    todo!()
+    libuwuc::io::stream::fopen(pathname, mode)
+        .map_err(|err| libuwuc::error::set_errno(err.0))
+        .ok()
 }
 
 #[no_mangle]
