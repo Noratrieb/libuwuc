@@ -14,7 +14,7 @@ pub unsafe extern "C" fn puts(s: *const c_char) -> i32 {
 // RAW FD:
 
 #[no_mangle]
-pub unsafe extern "C" fn open(path: SharedThinCstr, flags: i32) -> Fd {
+pub unsafe extern "C" fn open(path: SharedThinCstr<'_>, flags: i32) -> Fd {
     libuwuc::io::fd::open(path, flags).into_ok_or_errno()
 }
 
@@ -88,8 +88,8 @@ pub static stderr: &FileStream = &FileStream::from_raw_fd(STDERR);
 
 #[no_mangle]
 pub unsafe extern "C" fn fopen<'a>(
-    pathname: SharedThinCstr,
-    mode: SharedThinCstr,
+    pathname: SharedThinCstr<'_>,
+    mode: SharedThinCstr<'_>,
 ) -> Option<&'a FileStream> {
     libuwuc::io::stream::fopen(pathname, mode)
         .map_err(|err| libuwuc::error::set_errno(err.0))

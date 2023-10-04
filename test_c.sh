@@ -11,8 +11,8 @@ clean() {
 }
 
 for test in "$SCRIPT_DIR"/tests/c/*; do
-    name=$(basename $test .c)
-    printf "test $name "
+    name=$(basename "$test" .c)
+    printf "test %s " "$test"
 
     flags=$(grep "//@flags: " "$test" | sed 's#//@flags: ##')
 
@@ -31,7 +31,7 @@ for test in "$SCRIPT_DIR"/tests/c/*; do
         exit 1
     fi
 
-    cd "$SCRIPT_DIR/tests" 
+    cd "$SCRIPT_DIR/tests" || exit 1
     OUTPUT=$("$test_dir/$name")
     code="$?"
     if [ "$code" -ne "0" ]; then

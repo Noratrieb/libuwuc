@@ -2,6 +2,7 @@
 #![feature(c_variadic)]
 #![feature(panic_info_message)]
 #![deny(clippy::no_mangle_with_rust_abi)]
+#![warn(rust_2018_idioms)]
 
 mod rt;
 mod stdio;
@@ -19,7 +20,7 @@ fn rust_eh_personality() {
 
 #[panic_handler]
 #[cfg(not(test))]
-fn handler(arg: &core::panic::PanicInfo) -> ! {
+fn handler(arg: &core::panic::PanicInfo<'_>) -> ! {
     let args = format_args!("<no message>");
     let payload = arg.message().unwrap_or(&args);
     libuwuc::io::println!("panicked: {payload}");
