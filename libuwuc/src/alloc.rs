@@ -97,6 +97,50 @@ pub unsafe fn free(ptr: *mut u8) {
     ALLOCATOR.dealloc(start, layout);
 }
 
+fn array_size(nmemb: usize, size: usize) -> Option<usize> {
+    let total = nmemb.checked_mul(size)?;
+    if total > (isize::MAX as usize) {
+        return None;
+    }
+    Some(total)
+}
+
+pub unsafe fn malloc_zeroed_array(nmemb: usize, size: usize, align: usize) -> *mut u8 {
+    let Some(total) = nmemb.checked_mul(size) else {
+        return core::ptr::null_mut();
+    };
+    if total > (isize::MAX as usize) {
+        return core::ptr::null_mut();
+    }
+    malloc_zeroed(total, align)
+}
+
+pub unsafe fn realloc(ptr: *mut u8, size: usize, align: usize) -> *mut u8 {
+    let new = malloc_zeroed(size, align);
+    if !new.is_null() {
+        core::ptr::copy_nonoverlapping(ptr, new, size);
+    }
+    free(ptr);
+    new
+}
+
+pub unsafe extern "C" fn reallocarray(
+    ptr: *mut u8,
+    nmemb: usize,
+    size: usize,
+    align: usize,
+) -> *mut u8 {
+    let new = malloc_zeroed_array(size, size, align);
+    if !new.is_null() {
+        let Some(total) = array_size(nmemb, size) else {
+            return core::ptr::null_mut();
+        };
+        core::ptr::copy_nonoverlapping(ptr, new, total);
+    }
+    free(ptr);
+    new
+}
+
 #[cfg_attr(miri, allow(unused_variables, unreachable_code))]
 pub unsafe fn sys_mmap(
     addr: *const u8,

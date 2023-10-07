@@ -39,13 +39,17 @@ pub use println;
 
 use self::fd::Fd;
 
-pub unsafe fn sys_write(fd: i32, buf: &[u8]) -> Result<usize, Error> {
-    syscall::syscall!(syscall::SYS_WRITE, fd, buf.as_ptr(), buf.len()).syscall_resultify()
+pub unsafe fn sys_read(fd: Fd, buf: &mut [u8]) -> Result<usize, Error> {
+    syscall::syscall!(syscall::SYS_READ, fd.0, buf.as_ptr(), buf.len()).syscall_resultify()
+}
+
+pub unsafe fn sys_write(fd: Fd, buf: &[u8]) -> Result<usize, Error> {
+    syscall::syscall!(syscall::SYS_WRITE, fd.0, buf.as_ptr(), buf.len()).syscall_resultify()
 }
 
 pub unsafe fn write_all(fd: Fd, mut buf: &[u8]) -> Result<(), Error> {
     while !buf.is_empty() {
-        let result = sys_write(fd.0, buf)?;
+        let result = sys_write(fd, buf)?;
         buf = &buf[result..];
     }
     Ok(())

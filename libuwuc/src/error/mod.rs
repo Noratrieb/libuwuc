@@ -20,12 +20,17 @@ pub fn set_errno(errno: i32) {
     unsafe { ERRNO.0.get().write(errno) }
 }
 
+pub fn strerror(errnum: Error) -> Option<&'static str> {
+    errnum.simple_str()
+}
+
 #[derive(Copy, Clone, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct Error(pub i32);
 
 impl Debug for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.write_str(self.simple_str())
+        f.write_str(self.simple_str().unwrap_or("<error: invalid error>"))
     }
 }
 

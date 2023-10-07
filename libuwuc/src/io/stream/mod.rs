@@ -27,7 +27,7 @@ impl FileStream {
 
 impl IoWrite for &FileStream {
     fn write(&mut self, buf: &[u8]) -> Result<usize, Error> {
-        unsafe { super::sys_write(self.fd.0, buf) }
+        unsafe { super::sys_write(self.fd, buf) }
     }
 }
 

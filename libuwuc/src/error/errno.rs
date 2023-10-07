@@ -273,8 +273,8 @@ impl super::Error {
     pub const HWPOISON: Self = Self(EHWPOISON);
     pub const NOTSUP: Self = Self(ENOTSUP);
 
-    pub fn simple_str(self) -> &'static str {
-        match self {
+    pub fn simple_str(self) -> Option<&'static str> {
+        Some(match self {
             Self::PERM => "EPERM",
             Self::NOENT => "ENOENT",
             Self::SRCH => "ESRCH",
@@ -406,7 +406,7 @@ impl super::Error {
             Self::NOTRECOVERABLE => "ENOTRECOVERABLE",
             Self::RFKILL => "ERFKILL",
             Self::HWPOISON => "EHWPOISON",
-            _ => "<invalid error>",
-        }
+            _ => return None,
+        })
     }
 }

@@ -8,6 +8,7 @@ mod rt;
 mod stdio;
 mod stdlib;
 mod string;
+mod unistd;
 
 // libcore seems to require this symbol, even though it's unused.
 #[no_mangle]

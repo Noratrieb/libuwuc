@@ -17,6 +17,31 @@ pub unsafe fn memcpy(dest: *mut u8, src: *const u8, size: usize) -> *mut u8 {
 }
 
 #[inline]
+pub unsafe fn memmove(dest: *mut u8, src: *const u8, size: usize) -> *mut u8 {
+    if dest as usize > src as usize {
+        // 1 2 3 4 5 6 7
+        //       ^---- dest
+        //     ^---- src
+        // We need to move backwards, first copying the 5 to 6, then 4 to 5 etc.
+        // Iterating fowards would overwrite 4 with 3 before we can copy 4.
+        for i in (0..size).rev() {
+            dest.add(i).write(src.add(i).read());
+        }
+    } else {
+        // 1 2 3 4 5 6 7
+        //   ^---- dest
+        //     ^---- src
+        // We need to move forwards from src. This way we never overwrite values
+        // before we would need to read them.
+        for i in 0..size {
+            dest.add(i).write(src.add(i).read());
+        }
+    }
+
+    dest
+}
+
+#[inline]
 pub unsafe fn memcmp(s1: *const u8, s2: *const u8, size: usize) -> i32 {
     for i in 0..size {
         let a = s1.add(i).read();
@@ -54,6 +79,38 @@ mod tests {
         let mut dest = [0; 3];
         unsafe { super::memcpy(dest.as_mut_ptr(), src.as_ptr(), 3) };
         assert_eq!(dest, src);
+    }
+
+    #[test]
+    fn memmove_null() {
+        unsafe { super::memmove(std::ptr::null_mut(), std::ptr::null_mut(), 0) };
+    }
+
+    #[test]
+    fn memmove_one_forwards() {
+        let mut arr = [1, 2, 3, 4, 5];
+        let src = arr.as_mut_ptr();
+        let dest = unsafe { src.add(1) };
+        unsafe { super::memmove(dest, src, 4) };
+        assert_eq!(arr, [1, 1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn memmove_one_backwards() {
+        let mut arr = [1, 2, 3, 4, 5];
+        let src = unsafe { arr.as_mut_ptr().add(1) };
+        let dest = unsafe { src.sub(1) };
+        unsafe { super::memmove(dest, src, 4) };
+        assert_eq!(arr, [2, 3, 4, 5, 5]);
+    }
+
+    #[test]
+    fn memmove_full_overlap() {
+        let mut arr = [1, 2, 3, 4, 5];
+        let src = arr.as_mut_ptr();
+        let dest = src;
+        unsafe { super::memmove(src, dest, 4) };
+        assert_eq!(arr, [1, 2, 3, 4, 5]);
     }
 
     #[test]
