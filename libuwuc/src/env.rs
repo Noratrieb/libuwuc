@@ -73,8 +73,8 @@ fn getenv_inner(mut envp: EnvP, name: SharedThinCstr<'_>) -> Option<SharedThinCs
         let mut env_iter = env.into_iter();
         eq_idx = 0;
         loop {
-            let name = name_iter.next().map(|c| c as u8);
-            let env = env_iter.next().map(|c| c as u8);
+            let name = name_iter.next().map(|c| c);
+            let env = env_iter.next().map(|c| c);
             if let (None, Some(b'=')) = (name, env) {
                 return true;
             }

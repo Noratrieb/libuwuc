@@ -40,7 +40,7 @@ pub use println;
 use self::fd::Fd;
 
 pub unsafe fn sys_read(fd: Fd, buf: &mut [u8]) -> Result<usize, Error> {
-    syscall::syscall!(syscall::SYS_READ, fd.0, buf.as_ptr(), buf.len()).syscall_resultify()
+    syscall::syscall!(syscall::SYS_READ, fd.0, buf.as_mut_ptr(), buf.len()).syscall_resultify()
 }
 
 pub unsafe fn sys_write(fd: Fd, buf: &[u8]) -> Result<usize, Error> {

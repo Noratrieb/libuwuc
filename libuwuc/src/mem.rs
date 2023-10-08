@@ -1,3 +1,5 @@
+use crate::utils::SharedThinCstr;
+
 #[inline]
 pub unsafe fn memset(ptr: *mut u8, constant: u8, len: usize) {
     for i in 0..len {
@@ -57,6 +59,17 @@ pub unsafe fn memcmp(s1: *const u8, s2: *const u8, size: usize) -> i32 {
 }
 
 #[inline]
+pub unsafe fn strcmp(s1: SharedThinCstr<'_>, s2: SharedThinCstr<'_>) -> i32 {
+    s1.into_iter().cmp(s2) as i8 as i32
+}
+
+// This technically violates the safety precondition of SharedThinCstr but that's fine, we're careful.
+#[inline]
+pub unsafe fn strncmp(s1: SharedThinCstr<'_>, s2: SharedThinCstr<'_>, size: usize) -> i32 {
+    s1.into_iter().take(size).cmp(s2.into_iter().take(size)) as i8 as i32
+}
+
+#[inline]
 pub unsafe fn strlen(mut s: *const u8) -> usize {
     let mut len = 0;
     while s.read() != 0 {
@@ -68,6 +81,8 @@ pub unsafe fn strlen(mut s: *const u8) -> usize {
 
 #[cfg(test)]
 mod tests {
+    use crate::{cstr, utils::SharedThinCstr};
+
     #[test]
     fn memcpy_null() {
         unsafe { super::memcpy(std::ptr::null_mut(), std::ptr::null_mut(), 0) };
@@ -201,6 +216,95 @@ mod tests {
         let a = [1, 2, 6, 3, 4, 67, 7];
         let b = [1, 2, 5, 3, 5, 67, 7];
         let result = unsafe { super::memcmp(a.as_ptr(), b.as_ptr(), 7) };
+        assert_eq!(result, 1);
+    }
+
+    #[test]
+    fn strcmp_empty() {
+        let a = cstr!("");
+        let b = cstr!("");
+        let result = unsafe { super::strcmp(a, b) };
+        assert_eq!(result, 0);
+    }
+
+    #[test]
+    fn strcmp_against_empty() {
+        let a = cstr!("aa");
+        let b = cstr!("");
+        let result = unsafe { super::strcmp(a, b) };
+        assert_eq!(result, 1);
+    }
+
+    #[test]
+    fn strcmp_against_empty_rev() {
+        let a = cstr!("");
+        let b = cstr!("aa");
+        let result = unsafe { super::strcmp(a, b) };
+        assert_eq!(result, -1);
+    }
+
+    #[test]
+    fn strcmp_equal_len() {
+        let a = cstr!("00");
+        let b = cstr!("11");
+        let result = unsafe { super::strcmp(a, b) };
+        assert_eq!(result, -1);
+    }
+
+    #[test]
+    fn strcmp_equal_len_rev() {
+        let a = cstr!("11");
+        let b = cstr!("00");
+        let result = unsafe { super::strcmp(a, b) };
+        assert_eq!(result, 1);
+    }
+
+    #[test]
+    fn strncmp_empty() {
+        let a = cstr!("");
+        let b = cstr!("");
+        let result = unsafe { super::strncmp(a, b, 10) };
+        assert_eq!(result, 0);
+    }
+
+    #[test]
+    fn strncmp_no_null_term() {
+        // Note: this is violating the safety invariant of SharedThinCstr but thats fine, we're careful.
+        let a = unsafe { SharedThinCstr::from_raw(b"0000".as_ptr()) };
+        let b = unsafe { SharedThinCstr::from_raw(b"0001".as_ptr()) };
+        let result = unsafe { super::strncmp(a, b, 4) };
+        assert_eq!(result, -1);
+    }
+
+    #[test]
+    fn strncmp_against_empty() {
+        let a = cstr!("aa");
+        let b = cstr!("");
+        let result = unsafe { super::strncmp(a, b, 2) };
+        assert_eq!(result, 1);
+    }
+
+    #[test]
+    fn strncmp_against_empty_rev() {
+        let a = cstr!("");
+        let b = cstr!("aa");
+        let result = unsafe { super::strncmp(a, b, 2) };
+        assert_eq!(result, -1);
+    }
+
+    #[test]
+    fn strncmp_equal_len() {
+        let a = cstr!("00");
+        let b = cstr!("11");
+        let result = unsafe { super::strncmp(a, b, 2) };
+        assert_eq!(result, -1);
+    }
+
+    #[test]
+    fn strncmp_equal_len_rev() {
+        let a = cstr!("11");
+        let b = cstr!("00");
+        let result = unsafe { super::strncmp(a, b, 2) };
         assert_eq!(result, 1);
     }
 

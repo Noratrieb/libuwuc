@@ -3,6 +3,10 @@
     rustup
     gcc
     clang_16
+
+
+    # for building things
+    gnumake
   ];
   shellHook = ''
     export PATH=$PATH:''${CARGO_HOME:-~/.cargo}/bin

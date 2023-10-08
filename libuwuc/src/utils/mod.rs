@@ -73,7 +73,7 @@ impl<'a> Iterator for CStrIter<'a> {
             }
 
             self.0 = self.0.add(1);
-            Some(c as u8)
+            Some(c)
         }
     }
 }

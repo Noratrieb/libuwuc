@@ -16,3 +16,4 @@ ensure_cloned() {
 
 ensure_cloned "https://github.com/tsoding/noed.git" "tsoding_noed" "1c2bd182139080a8448a59589e8d457a7019d553"
 ensure_cloned "https://github.com/zesterer/tosh.git" "zest_tosh" "fa43ee9ec01a625f6a96cb48662f6c8911d8cc8c"
+ensure_cloned "https://github.com/tsoding/ebisp.git" "tsoding_ebisp" "1f522883ac99b5fdcd310cccc2b03e73a281f962"
