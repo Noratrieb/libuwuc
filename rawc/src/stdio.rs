@@ -2,7 +2,7 @@ use core::ffi::{c_char, c_int};
 
 use libuwuc::{
     error::IntoOkOrErrno,
-    io::{fd::Fd, stream::FileStream, traits::WriteCounter, STDERR, STDIN, STDOUT},
+    io::{stream::FileStream, traits::WriteCounter, STDERR, STDIN, STDOUT},
     utils::SharedThinCstr,
 };
 
@@ -11,11 +11,9 @@ pub unsafe extern "C" fn puts(s: *const c_char) -> i32 {
     libuwuc::io::puts(s)
 }
 
-// RAW FD:
-
 #[no_mangle]
-pub unsafe extern "C" fn open(path: SharedThinCstr<'_>, flags: i32) -> Fd {
-    libuwuc::io::fd::open(path, flags).into_ok_or_errno()
+pub unsafe extern "C" fn putchar(char: i32) -> i32 {
+    libuwuc::io::stream::fputc(char, stdout)
 }
 
 // PRINTF:
@@ -108,7 +106,7 @@ pub unsafe extern "C" fn ungetc(_c: c_int, _stream: *mut FileStream) -> c_int {
 
 #[no_mangle]
 pub unsafe extern "C" fn fputc(c: c_int, stream: *mut FileStream) -> c_int {
-    libuwuc::io::stream::fputc(c as u8, &*stream)
+    libuwuc::io::stream::fputc(c, &*stream)
 }
 
 #[no_mangle]

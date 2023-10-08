@@ -31,3 +31,9 @@ pub const O_NDELAY: i32 = O_NONBLOCK;
 pub const O_SYNC: i32 = 0o04010000;
 pub const O_FSYNC: i32 = O_SYNC;
 pub const O_ASYNC: i32 = 0o020000;
+
+pub const SEEK_SET: i32 = 0;
+pub const SEEK_CUR: i32 = 1;
+pub const SEEK_END: i32 = 2;
+pub const SEEK_DATA: i32 = 3;
+pub const SEEK_HOLE: i32 = 4;

@@ -4,6 +4,7 @@
 #![deny(clippy::no_mangle_with_rust_abi)]
 #![warn(rust_2018_idioms)]
 
+mod fcntl;
 mod rt;
 mod stdio;
 mod stdlib;

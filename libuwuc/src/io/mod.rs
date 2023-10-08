@@ -47,6 +47,10 @@ pub unsafe fn sys_write(fd: Fd, buf: &[u8]) -> Result<usize, Error> {
     syscall::syscall!(syscall::SYS_WRITE, fd.0, buf.as_ptr(), buf.len()).syscall_resultify()
 }
 
+pub unsafe fn sys_lseek(fd: Fd, offset: i64, whence: i32) -> Result<i64, Error> {
+    syscall::syscall!(syscall::SYS_LSEEK, fd.0, offset, whence).syscall_resultify()
+}
+
 pub unsafe fn write_all(fd: Fd, mut buf: &[u8]) -> Result<(), Error> {
     while !buf.is_empty() {
         let result = sys_write(fd, buf)?;

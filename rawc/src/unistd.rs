@@ -14,3 +14,8 @@ pub unsafe extern "C" fn write(fd: Fd, buf: *const u8, count: usize) -> isize {
         .map(|n| n as isize)
         .into_ok_or_errno()
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lseek(fd: Fd, offset: i64, whence: i32) -> i64 {
+    libuwuc::io::sys_lseek(fd, offset, whence).into_ok_or_errno()
+}

@@ -43,8 +43,8 @@ pub unsafe fn fopen<'a>(
     unsafe { Ok(&*alloc::boxed(FileStream { fd })) }
 }
 
-pub fn fputc(c: u8, stream: &FileStream) -> i32 {
-    match stream.write_byte(c) {
+pub fn fputc(c: i32, stream: &FileStream) -> i32 {
+    match stream.write_byte(c as u8) {
         Ok(_) => c as _,
         Err(_) => EOF,
     }
