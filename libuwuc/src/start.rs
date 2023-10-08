@@ -1,13 +1,13 @@
 use core::ffi::{c_char, c_int};
 
-use crate::utils::SharedThinCstr;
+use crate::utils::CStrRef;
 
 /// The entrypoint of the program.
 /// This is called by a bit of assembly handling architecture-specific _start.
 pub(crate) unsafe extern "C" fn start(rsp: u64) -> ! {
     let argc = (rsp as *const u64).read();
     let argv = (rsp + 8) as *const *const c_char;
-    let envp = (8 + 8 * argc + rsp + 8) as *mut Option<SharedThinCstr<'static>>;
+    let envp = (8 + 8 * argc + rsp + 8) as *mut Option<CStrRef<'static>>;
 
     crate::env::init(envp);
 

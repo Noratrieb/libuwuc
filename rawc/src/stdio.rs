@@ -3,7 +3,7 @@ use core::ffi::{c_char, c_int};
 use libuwuc::{
     error::IntoOkOrErrno,
     io::{stream::FileStream, traits::WriteCounter, STDERR, STDIN, STDOUT},
-    utils::SharedThinCstr,
+    utils::CStrRef,
 };
 
 #[no_mangle]
@@ -24,7 +24,7 @@ pub unsafe extern "C" fn __printf_chk(_flag: c_int, format: *const u8, mut args:
 
     let result = libuwuc::fmt::printf::printf_generic(
         &mut sink,
-        SharedThinCstr::from_raw(format),
+        CStrRef::from_raw(format),
         args.as_va_list(),
     );
 
@@ -37,7 +37,7 @@ pub unsafe extern "C" fn printf(format: *const u8, mut args: ...) -> c_int {
 
     let result = libuwuc::fmt::printf::printf_generic(
         &mut sink,
-        SharedThinCstr::from_raw(format),
+        CStrRef::from_raw(format),
         args.as_va_list(),
     );
 
@@ -55,7 +55,7 @@ pub unsafe extern "C" fn __fprintf_chk(
 
     let result = libuwuc::fmt::printf::printf_generic(
         &mut sink,
-        SharedThinCstr::from_raw(format),
+        CStrRef::from_raw(format),
         args.as_va_list(),
     );
 
@@ -68,7 +68,7 @@ pub unsafe extern "C" fn fprintf(file: &FileStream, format: *const u8, mut args:
 
     let result = libuwuc::fmt::printf::printf_generic(
         &mut sink,
-        SharedThinCstr::from_raw(format),
+        CStrRef::from_raw(format),
         args.as_va_list(),
     );
 
@@ -86,8 +86,8 @@ pub static stderr: &FileStream = &FileStream::from_raw_fd(STDERR);
 
 #[no_mangle]
 pub unsafe extern "C" fn fopen<'a>(
-    pathname: SharedThinCstr<'_>,
-    mode: SharedThinCstr<'_>,
+    pathname: CStrRef<'_>,
+    mode: CStrRef<'_>,
 ) -> Option<&'a FileStream> {
     libuwuc::io::stream::fopen(pathname, mode)
         .map_err(|err| libuwuc::error::set_errno(err.0))

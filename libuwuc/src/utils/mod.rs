@@ -2,13 +2,13 @@ use core::{cell::UnsafeCell, ffi::CStr, fmt::Debug, marker::PhantomData, ptr::No
 
 #[repr(transparent)]
 #[derive(Default)]
-pub(crate) struct SyncUnsafeCell<T>(pub(crate) UnsafeCell<T>);
+pub struct SyncUnsafeCell<T>(pub UnsafeCell<T>);
 
 unsafe impl<T: Sync> Sync for SyncUnsafeCell<T> {}
 
 #[derive(Clone, Copy)]
 #[repr(transparent)]
-pub struct SharedThinCstr<'a>(NonNull<u8>, PhantomData<&'a CStr>);
+pub struct CStrRef<'a>(NonNull<u8>, PhantomData<&'a CStr>);
 
 #[macro_export]
 macro_rules! cstr {
@@ -16,14 +16,14 @@ macro_rules! cstr {
         let s = concat!($value, "\0");
         #[allow(unused_unsafe)]
         unsafe {
-            $crate::utils::SharedThinCstr::from_raw(s.as_ptr().cast())
+            $crate::utils::CStrRef::from_raw(s.as_ptr().cast())
         }
     }};
 }
 
 pub use cstr;
 
-impl<'a> SharedThinCstr<'a> {
+impl<'a> CStrRef<'a> {
     pub unsafe fn from_raw(ptr: *const u8) -> Self {
         Self(NonNull::new_unchecked(ptr as *mut u8), PhantomData)
     }
@@ -50,7 +50,7 @@ impl<'a> SharedThinCstr<'a> {
     }
 }
 
-impl<'a> IntoIterator for SharedThinCstr<'a> {
+impl<'a> IntoIterator for CStrRef<'a> {
     type Item = u8;
 
     type IntoIter = CStrIter<'a>;
@@ -60,7 +60,7 @@ impl<'a> IntoIterator for SharedThinCstr<'a> {
     }
 }
 
-pub struct CStrIter<'a>(SharedThinCstr<'a>);
+pub struct CStrIter<'a>(CStrRef<'a>);
 
 impl<'a> Iterator for CStrIter<'a> {
     type Item = u8;
@@ -78,10 +78,10 @@ impl<'a> Iterator for CStrIter<'a> {
     }
 }
 
-unsafe impl<'a> Send for SharedThinCstr<'a> {}
-unsafe impl<'a> Sync for SharedThinCstr<'a> {}
+unsafe impl<'a> Send for CStrRef<'a> {}
+unsafe impl<'a> Sync for CStrRef<'a> {}
 
-impl<'a> Debug for SharedThinCstr<'a> {
+impl<'a> Debug for CStrRef<'a> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let str = <&CStr>::from(*self).to_str();
         match str {
@@ -91,22 +91,22 @@ impl<'a> Debug for SharedThinCstr<'a> {
     }
 }
 
-impl<'a> From<SharedThinCstr<'a>> for &'a CStr {
-    fn from(value: SharedThinCstr<'a>) -> Self {
+impl<'a> From<CStrRef<'a>> for &'a CStr {
+    fn from(value: CStrRef<'a>) -> Self {
         unsafe { CStr::from_ptr(value.0.as_ptr().cast()) }
     }
 }
 
-impl<'a> PartialEq for SharedThinCstr<'a> {
+impl<'a> PartialEq for CStrRef<'a> {
     fn eq(&self, other: &Self) -> bool {
         self.into_iter().eq(*other)
     }
 }
 
-impl<'a> Eq for SharedThinCstr<'a> {}
+impl<'a> Eq for CStrRef<'a> {}
 
 #[repr(transparent)]
-pub(crate) struct SyncPtr<T>(pub(crate) *mut T);
+pub struct SyncPtr<T>(pub *mut T);
 
 unsafe impl<T> Send for SyncPtr<T> {}
 unsafe impl<T> Sync for SyncPtr<T> {}

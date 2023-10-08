@@ -1,11 +1,11 @@
-use crate::utils::SharedThinCstr;
+use crate::utils::CStrRef;
 use core::fmt::Write;
 
 pub fn assert_failed(
-    assertion: SharedThinCstr<'_>,
-    file: SharedThinCstr<'_>,
+    assertion: CStrRef<'_>,
+    file: CStrRef<'_>,
     line: u32,
-    _function: Option<SharedThinCstr<'_>>,
+    _function: Option<CStrRef<'_>>,
 ) -> ! {
     let _ = writeln!(
         crate::io::Printer(crate::io::STDERR),

@@ -1,6 +1,6 @@
 use core::ffi::c_uint;
 
-use libuwuc::utils::SharedThinCstr;
+use libuwuc::utils::CStrRef;
 
 #[no_mangle]
 pub extern "C" fn __stack_chk_fail() -> ! {
@@ -23,9 +23,9 @@ pub unsafe extern "C" fn __assert_fail(
     function: *const u8,
 ) -> ! {
     libuwuc::misc::assert_failed(
-        SharedThinCstr::from_raw(assertion),
-        SharedThinCstr::from_raw(file),
+        CStrRef::from_raw(assertion),
+        CStrRef::from_raw(file),
         line,
-        SharedThinCstr::from_nullable(function),
+        CStrRef::from_nullable(function),
     )
 }

@@ -1,4 +1,4 @@
-use crate::utils::SharedThinCstr;
+use crate::utils::CStrRef;
 
 #[inline]
 pub unsafe fn memset(ptr: *mut u8, constant: u8, len: usize) {
@@ -59,13 +59,13 @@ pub unsafe fn memcmp(s1: *const u8, s2: *const u8, size: usize) -> i32 {
 }
 
 #[inline]
-pub unsafe fn strcmp(s1: SharedThinCstr<'_>, s2: SharedThinCstr<'_>) -> i32 {
+pub unsafe fn strcmp(s1: CStrRef<'_>, s2: CStrRef<'_>) -> i32 {
     s1.into_iter().cmp(s2) as i8 as i32
 }
 
 // This technically violates the safety precondition of SharedThinCstr but that's fine, we're careful.
 #[inline]
-pub unsafe fn strncmp(s1: SharedThinCstr<'_>, s2: SharedThinCstr<'_>, size: usize) -> i32 {
+pub unsafe fn strncmp(s1: CStrRef<'_>, s2: CStrRef<'_>, size: usize) -> i32 {
     s1.into_iter().take(size).cmp(s2.into_iter().take(size)) as i8 as i32
 }
 
@@ -81,7 +81,7 @@ pub unsafe fn strlen(mut s: *const u8) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use crate::{cstr, utils::SharedThinCstr};
+    use crate::{cstr, utils::CStrRef};
 
     #[test]
     fn memcpy_null() {
@@ -270,8 +270,8 @@ mod tests {
     #[test]
     fn strncmp_no_null_term() {
         // Note: this is violating the safety invariant of SharedThinCstr but thats fine, we're careful.
-        let a = unsafe { SharedThinCstr::from_raw(b"0000".as_ptr()) };
-        let b = unsafe { SharedThinCstr::from_raw(b"0001".as_ptr()) };
+        let a = unsafe { CStrRef::from_raw(b"0000".as_ptr()) };
+        let b = unsafe { CStrRef::from_raw(b"0001".as_ptr()) };
         let result = unsafe { super::strncmp(a, b, 4) };
         assert_eq!(result, -1);
     }

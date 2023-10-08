@@ -1,10 +1,10 @@
 use core::ffi::VaList;
 
-use crate::{io::IoWrite, utils::SharedThinCstr, error::Error};
+use crate::{io::IoWrite, utils::CStrRef, error::Error};
 
 pub unsafe fn printf_generic(
     mut sink: impl IoWrite,
-    format: SharedThinCstr<'_>,
+    format: CStrRef<'_>,
     mut args: VaList<'_, '_>,
 ) -> Result<(), Error> {
     let mut chars = format.into_iter();
@@ -47,11 +47,11 @@ mod tests {
     use std::string::String;
     use std::vec::Vec;
 
-    use crate::utils::{cstr, SharedThinCstr};
+    use crate::utils::{cstr, CStrRef};
 
     use super::printf_generic;
 
-    unsafe extern "C" fn test_printf(expected: &str, fmt: SharedThinCstr<'_>, mut args: ...) {
+    unsafe extern "C" fn test_printf(expected: &str, fmt: CStrRef<'_>, mut args: ...) {
         let mut sink = Vec::new();
 
         printf_generic(&mut sink, fmt, args.as_va_list()).unwrap();

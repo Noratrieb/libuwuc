@@ -1,17 +1,17 @@
 use crate::{
     error::{Error, SyscallResultExt},
-    utils::SharedThinCstr,
+    utils::CStrRef,
 };
 
 #[derive(Clone, Copy)]
 #[repr(transparent)]
 pub struct Fd(pub i32);
 
-pub fn open(arg: SharedThinCstr<'_>, flags: i32) -> Result<Fd, Error> {
+pub fn open(arg: CStrRef<'_>, flags: i32) -> Result<Fd, Error> {
     sys_open(arg, flags)
 }
 
-pub fn sys_open(arg: SharedThinCstr<'_>, flags: i32) -> Result<Fd, Error> {
+pub fn sys_open(arg: CStrRef<'_>, flags: i32) -> Result<Fd, Error> {
     unsafe {
         crate::syscall::syscall!(crate::syscall::SYS_OPEN, arg.as_raw(), flags).syscall_resultify()
     }

@@ -1,6 +1,6 @@
 use core::ffi::{c_int, c_long};
 
-use libuwuc::{error::IntoOkOrErrno, utils::SharedThinCstr};
+use libuwuc::{error::IntoOkOrErrno, utils::CStrRef};
 
 // Allocation functions
 
@@ -35,10 +35,10 @@ pub unsafe extern "C" fn reallocarray(ptr: *mut u8, nmemb: usize, size: usize) -
 
 #[no_mangle]
 pub unsafe extern "C" fn strtol(nptr: *const u8, endptr: *mut *const u8, base: c_int) -> c_long {
-    let str = SharedThinCstr::from_raw(nptr);
+    let str = CStrRef::from_raw(nptr);
     libuwuc::fmt::parse::parse_long(
         str,
-        core::mem::transmute::<*mut *const u8, Option<&mut Option<SharedThinCstr<'_>>>>(endptr),
+        core::mem::transmute::<*mut *const u8, Option<&mut Option<CStrRef<'_>>>>(endptr),
         base,
     )
     .into_ok_or_errno()
@@ -53,8 +53,8 @@ pub unsafe extern "C" fn strtoll(nptr: *const u8, endptr: *mut *const u8, base: 
 
 #[no_mangle]
 pub unsafe extern "C" fn getenv(name: *const u8) -> *const u8 {
-    libuwuc::env::getenv(SharedThinCstr::from_raw(name))
-        .map(SharedThinCstr::as_raw)
+    libuwuc::env::getenv(CStrRef::from_raw(name))
+        .map(CStrRef::as_raw)
         .unwrap_or(core::ptr::null())
 }
 

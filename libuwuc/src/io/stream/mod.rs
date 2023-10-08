@@ -4,7 +4,7 @@ use crate::{
     alloc,
     error::Error,
     io::{fd, stream::file::OpenMode},
-    utils::SharedThinCstr,
+    utils::CStrRef,
 };
 
 use super::{fd::Fd, IoWrite, EOF};
@@ -32,8 +32,8 @@ impl IoWrite for &FileStream {
 }
 
 pub unsafe fn fopen<'a>(
-    pathname: SharedThinCstr<'_>,
-    mode: SharedThinCstr<'_>,
+    pathname: CStrRef<'_>,
+    mode: CStrRef<'_>,
 ) -> Result<&'a FileStream, Error> {
     let Ok(mode) = OpenMode::parse(mode) else {
         return Err(Error::INVAL);

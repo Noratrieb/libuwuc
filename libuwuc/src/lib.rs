@@ -16,6 +16,7 @@ pub mod io;
 pub mod mem;
 pub mod misc;
 pub mod start;
+pub mod string;
 mod stubs;
 mod sys;
 pub mod utils;

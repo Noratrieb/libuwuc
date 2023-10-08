@@ -1,4 +1,4 @@
-use crate::{io::fd, utils::SharedThinCstr};
+use crate::{io::fd, utils::CStrRef};
 
 #[derive(Debug, PartialEq)]
 pub enum OpenMode {
@@ -22,7 +22,7 @@ impl OpenMode {
         }
     }
 
-    pub fn parse(str: SharedThinCstr<'_>) -> Result<OpenMode, &'static str> {
+    pub fn parse(str: CStrRef<'_>) -> Result<OpenMode, &'static str> {
         let mut buf = [0; 2];
         let mut i = 0;
 

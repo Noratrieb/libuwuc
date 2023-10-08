@@ -1,10 +1,10 @@
 use core::ffi::{c_int, c_long};
 
-use crate::{error::Error, utils::SharedThinCstr};
+use crate::{error::Error, utils::CStrRef};
 
 pub fn parse_long<'a>(
-    str: SharedThinCstr<'a>,
-    endptr: Option<&mut Option<SharedThinCstr<'a>>>,
+    str: CStrRef<'a>,
+    endptr: Option<&mut Option<CStrRef<'a>>>,
     base: c_int,
 ) -> Result<c_long, Error> {
     if base != 10 {
@@ -83,9 +83,9 @@ pub fn parse_long<'a>(
 
 #[cfg(test)]
 mod tests {
-    use crate::{cstr, utils::SharedThinCstr};
+    use crate::{cstr, utils::CStrRef};
 
-    fn test_strtol(str: SharedThinCstr<'_>, expected: i64, base: i32, parsed_len: usize) {
+    fn test_strtol(str: CStrRef<'_>, expected: i64, base: i32, parsed_len: usize) {
         let mut end = None;
         let result = super::parse_long(str, Some(&mut end), base).unwrap();
         assert_eq!(result, expected);
